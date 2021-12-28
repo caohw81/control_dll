@@ -1,0 +1,32 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: u_control_dll - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Users\chw\AppData\Local\Temp\RSP7BDC.tmp" with contents
+[
+/nologo /subsystem:windows /dll /incremental:no /pdb:"Release/u_control_dll.pdb" /machine:I386 /def:".\u_control_dll.def" /out:"Release/u_control_dll.dll" /implib:"Release/u_control_dll.lib" 
+.\Release\log_out.obj
+.\Release\StdAfx.obj
+.\Release\tinystr.obj
+.\Release\tinyxml.obj
+.\Release\tinyxmlerror.obj
+.\Release\tinyxmlparser.obj
+.\Release\u_control_dll.obj
+.\Release\u_control_dll.res
+]
+Creating command line "link.exe @C:\Users\chw\AppData\Local\Temp\RSP7BDC.tmp"
+<h3>Output Window</h3>
+Linking...
+   Creating library Release/u_control_dll.lib and object Release/u_control_dll.exp
+
+
+
+<h3>Results</h3>
+u_control_dll.dll - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

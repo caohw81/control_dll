@@ -1,0 +1,7 @@
+; u_control_dll.def : Declares the module parameters for the DLL.
+
+LIBRARY      "u_control_dll"
+DESCRIPTION  'u_control_dll Windows Dynamic Link Library'
+
+EXPORTS
+    ; Explicit exports can go here

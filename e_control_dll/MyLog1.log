@@ -1,0 +1,74 @@
+2021-12-23 19:40:44.161 init dll
+2021-12-23 19:40:49.201 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:40:50.469 femto_status_request@@ipIndex:1
+2021-12-23 19:40:50.485 femto_status@@ipIndex:1, euarfcn:0,mcc:460,mnc:0015,pci:0
+2021-12-23 19:40:54.184 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:40:59.197 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:41:04.196 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:41:09.199 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:41:14.210 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:41:15.652 femto_status_request@@ipIndex:1
+2021-12-23 19:41:15.659 femto_status@@ipIndex:1, euarfcn:0,mcc:460,mnc:0015,pci:0
+2021-12-23 19:41:19.222 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:41:24.230 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:41:29.240 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:41:34.251 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:41:39.264 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:41:42.660 femto_status_request@@ipIndex:1
+2021-12-23 19:41:42.665 femto_status@@ipIndex:1, euarfcn:1850,mcc:460,mnc:11,pci:456
+2021-12-23 19:41:44.263 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:41:49.276 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:41:54.281 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:41:59.289 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:42:04.304 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:42:06.692 setCellConfig@@ipIndex:1, euarfcn:1850,mcc:460,mnc:11,pci:77,tac:224,periodTac:0,bandwidth:10,cellid:1700968
+2021-12-23 19:42:07.068 set_configuration_result@@ipIndex:1,m_result:0
+2021-12-23 19:42:09.317 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:42:11.037 setRedirection@@ipIndex:1, category:0,priority:1700972,GeranRedirect:0,arfcn:0,UtranRedirect:0,uarfcn:0,EutranRedirect:0,earfcn:0,RejectMethod:255
+2021-12-23 19:42:11.068 set_redirection_rsp@@ipIndex:1,m_result:0
+2021-12-23 19:42:14.260 activeCell@@ipIndex:1, active_mode:1,mode:1
+2021-12-23 19:42:14.331 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:42:15.626 activate_nodeb_result@@ipIndex:1, m_result:0
+2021-12-23 19:42:19.345 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:42:20.588 femto_status_request@@ipIndex:1
+2021-12-23 19:42:20.595 femto_status@@ipIndex:1, euarfcn:1850,mcc:460,mnc:11,pci:77
+2021-12-23 19:42:24.350 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:42:29.354 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:42:33.874 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:42:34.358 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:42:39.369 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:42:44.383 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:42:49.386 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:42:54.402 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:42:59.417 status_response@@ipIndex:1, m_status:1
+2021-12-23 19:43:04.419 status_response@@ipIndex:1, m_status:1
+2021-12-23 20:09:02.976 init dll
+2021-12-23 20:09:07.757 femto_status_request@@ipIndex:1
+2021-12-23 20:09:07.766 femto_status@@ipIndex:1, euarfcn:1850,mcc:460,mnc:11,pci:77
+2021-12-23 20:09:07.989 status_response@@ipIndex:1, m_status:1
+2021-12-23 20:09:12.998 status_response@@ipIndex:1, m_status:1
+2021-12-23 20:09:18.009 status_response@@ipIndex:1, m_status:1
+2021-12-23 20:09:23.020 status_response@@ipIndex:1, m_status:1
+2021-12-23 20:09:28.036 status_response@@ipIndex:1, m_status:1
+2021-12-23 20:09:33.044 status_response@@ipIndex:1, m_status:1
+2021-12-23 20:09:38.049 status_response@@ipIndex:1, m_status:1
+2021-12-23 20:09:43.062 status_response@@ipIndex:1, m_status:1
+2021-12-23 20:09:46.157 activeCell@@ipIndex:1, active_mode:1,mode:1
+2021-12-23 20:09:46.172 activate_nodeb_result@@ipIndex:1, m_result:0
+2021-12-23 20:09:48.073 status_response@@ipIndex:1, m_status:1
+2021-12-23 20:09:48.781 femto_status_request@@ipIndex:1
+2021-12-23 20:09:48.788 femto_status@@ipIndex:1, euarfcn:1850,mcc:460,mnc:11,pci:77
+2021-12-23 20:09:50.540 femto_status_request@@ipIndex:1
+2021-12-23 20:09:50.548 femto_status@@ipIndex:1, euarfcn:1850,mcc:460,mnc:11,pci:77
+2021-12-23 20:09:53.088 status_response@@ipIndex:1, m_status:1
+2021-12-23 20:09:53.861 setCellConfig@@ipIndex:1, euarfcn:1850,mcc:460,mnc:11,pci:78,tac:224,periodTac:0,bandwidth:10,cellid:11234567
+2021-12-23 20:09:54.843 set_configuration_result@@ipIndex:1,m_result:0
+2021-12-23 20:09:59.373 femto_status_request@@ipIndex:1
+2021-12-23 20:10:03.837 femto_status_request@@ipIndex:1
+2021-12-23 20:10:16.829 activeCell@@ipIndex:1, active_mode:1,mode:1
+2021-12-23 20:10:21.021 setCellConfig@@ipIndex:1, euarfcn:1850,mcc:460,mnc:11,pci:78,tac:224,periodTac:0,bandwidth:10,cellid:11234567
+2021-12-23 20:10:23.381 setCellConfig@@ipIndex:1, euarfcn:1850,mcc:460,mnc:11,pci:78,tac:224,periodTac:0,bandwidth:10,cellid:11234567
+2021-12-23 20:10:27.518 setRedirection@@ipIndex:1, category:1,priority:Others,GeranRedirect:0,arfcn:0,UtranRedirect:0,uarfcn:0,EutranRedirect:0,earfcn:0,RejectMethod:255
+2021-12-23 20:10:32.925 setCellConfig@@ipIndex:1, euarfcn:1850,mcc:460,mnc:11,pci:78,tac:224,periodTac:0,bandwidth:10,cellid:11234567
+2021-12-23 20:10:33.109 setCellConfig@@ipIndex:1, euarfcn:1850,mcc:460,mnc:11,pci:78,tac:224,periodTac:0,bandwidth:10,cellid:11234567
+2021-12-23 20:10:33.261 setCellConfig@@ipIndex:1, euarfcn:1850,mcc:460,mnc:11,pci:78,tac:224,periodTac:0,bandwidth:10,cellid:11234567

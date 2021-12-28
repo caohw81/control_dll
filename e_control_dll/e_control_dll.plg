@@ -1,0 +1,32 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: e_control_dll - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Users\chw\AppData\Local\Temp\RSP68AC.tmp" with contents
+[
+/nologo /subsystem:windows /dll /incremental:no /pdb:"Release/e_control_dll.pdb" /machine:I386 /def:".\e_control_dll.def" /out:"Release/e_control_dll.dll" /implib:"Release/e_control_dll.lib" 
+.\Release\e_control_dll.obj
+.\Release\log_out.obj
+.\Release\StdAfx.obj
+.\Release\tinystr.obj
+.\Release\tinyxml.obj
+.\Release\tinyxmlerror.obj
+.\Release\tinyxmlparser.obj
+.\Release\e_control_dll.res
+]
+Creating command line "link.exe @C:\Users\chw\AppData\Local\Temp\RSP68AC.tmp"
+<h3>Output Window</h3>
+Linking...
+   Creating library Release/e_control_dll.lib and object Release/e_control_dll.exp
+
+
+
+<h3>Results</h3>
+e_control_dll.dll - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

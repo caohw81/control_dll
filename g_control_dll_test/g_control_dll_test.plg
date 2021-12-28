@@ -1,0 +1,27 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: g_control_dll_test - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Users\Caohw\AppData\Local\Temp\RSPC3CC.tmp" with contents
+[
+/nologo /subsystem:windows /incremental:no /pdb:"Release/g_control_dll_test.pdb" /machine:I386 /out:"Release/g_control_dll_test.exe" 
+".\Release\g_control_dll_test.obj"
+".\Release\g_control_dll_testDlg.obj"
+".\Release\StdAfx.obj"
+".\Release\g_control_dll_test.res"
+]
+Creating command line "link.exe @C:\Users\Caohw\AppData\Local\Temp\RSPC3CC.tmp"
+<h3>Output Window</h3>
+Linking...
+
+
+
+<h3>Results</h3>
+g_control_dll_test.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

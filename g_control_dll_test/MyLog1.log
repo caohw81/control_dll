@@ -1,0 +1,70 @@
+2021-12-20 19:42:21.875 clearWhiteImsi Ok & ipIndex:1,carNum:0
+2021-12-20 19:43:23.719 init dll
+2021-12-20 19:43:33.018 g_checkBlackImsi&&ipIndex:1,carNum:0
+2021-12-20 19:43:43.131 g_checkWhiteImsi&&ipIndex:1,carNum:0
+2021-12-20 19:43:52.979 g_addBlackImsi&&ipIndex:1,carNum:0,imsi:460000000000005
+2021-12-20 19:43:54.091 addBlackImsi Ok & ipIndex:1,carNum:0
+2021-12-20 19:43:56.482 g_checkBlackImsi&&ipIndex:1,carNum:0
+2021-12-20 19:43:56.488 checkBlackImsi Ok & ipIndex:1,carNum:0,imsi:460000000000005
+2021-12-20 19:48:05.246 init dll
+2021-12-20 19:49:19.195 getImsiReport & ipIndex:1,carNum:1,imsi:460029520358641,imei:869803040211750
+2021-12-20 19:52:03.510 init dll
+2021-12-20 19:52:16.801 getImsiReport & ipIndex:1,carNum:1,imsi:460029520358641,imei:869803040211750
+2021-12-25 19:37:16.633 init dll
+2021-12-25 19:37:22.893 g_setCellConfig&&ipIndex:1,carNum:0,mcc:460,mnc:00,lac:3080,ci:8003,tac:60,carrier:60,downAtten:30
+2021-12-25 19:37:24.553 setCellConfig Ok & ipIndex:1,carNum:0
+2021-12-25 19:37:29.412 g_setRunningMode&&ipIndex:1,carNum:0,controlMode:0,workMode:0,msgSendMode:0
+2021-12-25 19:37:30.997 setRunningMode Ok & ipIndex:1,carNum:0
+2021-12-25 19:37:32.044 g_turnOnRF&&ipIndex:1,carNum:0
+2021-12-25 19:37:32.045 turnOnRF Ok & ipIndex:1,carNum:0
+2021-12-25 19:37:36.188 g_turnOffRF&&ipIndex:1,carNum:0
+2021-12-25 19:37:36.190 turnOffRF Ok & ipIndex:1,carNum:0
+2021-12-25 19:37:40.412 g_addBlackImsi&&ipIndex:1,carNum:0,imsi:460000000000005
+2021-12-25 19:37:41.548 addBlackImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:37:41.836 g_checkBlackImsi&&ipIndex:1,carNum:0
+2021-12-25 19:37:41.840 checkBlackImsi Ok & ipIndex:1,carNum:0,imsi:460000000000005
+2021-12-25 19:37:44.412 g_addWhiteImsi&&ipIndex:1,carNum:0,imsi:460000000000050
+2021-12-25 19:37:45.619 addWhiteImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:37:46.668 g_checkWhiteImsi&&ipIndex:1,carNum:0
+2021-12-25 19:37:46.672 checkWhiteImsi Ok & ipIndex:1,carNum:0,imsi:460000000000050
+2021-12-25 19:37:50.541 g_deleteBlackImsi&&ipIndex:1,carNum:0,imsi:460000000000005
+2021-12-25 19:37:51.738 deleteBlackImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:37:51.868 g_clearBlackImsiList&&ipIndex:1,carNum:0
+2021-12-25 19:37:53.039 clearBlackImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:37:53.484 g_deleteWhiteImsi&&ipIndex:1,carNum:0,imsi:460000000000050
+2021-12-25 19:37:54.625 deleteWhiteImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:37:57.908 g_clearBlackImsiList&&ipIndex:1,carNum:0
+2021-12-25 19:37:59.043 clearBlackImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:38:09.380 g_clearWhiteImsiList&&ipIndex:1,carNum:0
+2021-12-25 19:38:10.511 clearWhiteImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:38:25.673 init dll
+2021-12-25 19:38:27.756 g_clearBlackImsiList&&ipIndex:1,carNum:0
+2021-12-25 19:38:28.969 clearBlackImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:38:31.780 g_checkBlackImsi&&ipIndex:1,carNum:0
+2021-12-25 19:38:39.916 g_deleteBlackImsi&&ipIndex:1,carNum:0,imsi:460000000000005
+2021-12-25 19:38:41.121 deleteBlackImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:38:58.084 g_clearBlackImsiList&&ipIndex:1,carNum:0
+2021-12-25 19:38:59.198 clearBlackImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:39:02.068 g_clearWhiteImsiList&&ipIndex:1,carNum:0
+2021-12-25 19:39:03.275 clearWhiteImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:39:04.963 g_deleteWhiteImsi&&ipIndex:1,carNum:0,imsi:460000000000050
+2021-12-25 19:39:06.172 deleteWhiteImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:39:10.932 g_deleteBlackImsi&&ipIndex:1,carNum:0,imsi:460000000000005
+2021-12-25 19:39:12.091 deleteBlackImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:39:15.525 g_deleteWhiteImsi&&ipIndex:1,carNum:0,imsi:460000000000050
+2021-12-25 19:39:16.604 deleteWhiteImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:39:19.803 g_checkBlackImsi&&ipIndex:1,carNum:0
+2021-12-25 19:39:26.324 g_checkWhiteImsi&&ipIndex:1,carNum:0
+2021-12-25 19:39:29.020 g_addBlackImsi&&ipIndex:1,carNum:0,imsi:460000000000005
+2021-12-25 19:39:30.210 addBlackImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:39:32.060 g_checkBlackImsi&&ipIndex:1,carNum:0
+2021-12-25 19:39:32.064 checkBlackImsi Ok & ipIndex:1,carNum:0,imsi:460000000000005
+2021-12-25 19:39:35.460 g_deleteBlackImsi&&ipIndex:1,carNum:0,imsi:460000000000005
+2021-12-25 19:39:36.327 deleteBlackImsi Ok & ipIndex:1,carNum:0
+2021-12-25 19:39:45.940 g_checkBlackImsi&&ipIndex:1,carNum:0
+2021-12-25 19:39:46.764 g_checkBlackImsi&&ipIndex:1,carNum:0
+2021-12-25 20:05:56.360 init dll
+2021-12-25 20:06:01.931 g_carrFrePointCheck&&ipIndex:1,carNum:0
+2021-12-25 20:08:04.539 init dll
+2021-12-25 20:08:10.234 g_carrFrePointCheck&&ipIndex:1,carNum:0
+2021-12-25 20:08:15.427 g_carrFrePointCheck&&ipIndex:1,carNum:1

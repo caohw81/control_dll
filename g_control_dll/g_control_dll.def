@@ -1,0 +1,7 @@
+; g_control_dll.def : Declares the module parameters for the DLL.
+
+LIBRARY      "g_control_dll"
+DESCRIPTION  'g_control_dll Windows Dynamic Link Library'
+
+EXPORTS
+    ; Explicit exports can go here

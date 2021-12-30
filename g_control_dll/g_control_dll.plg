@@ -1,0 +1,26 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: g_control_dll - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Users\chw\AppData\Local\Temp\RSPFA2E.tmp" with contents
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_WINDLL" /D "_AFXDLL" /D "_MBCS" /D "_USRDLL" /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\myWork\2021WS\ws2021_gk\control_dll\g_control_dll\g_control_dll.cpp"
+]
+Creating command line "cl.exe @C:\Users\chw\AppData\Local\Temp\RSPFA2E.tmp" 
+<h3>Output Window</h3>
+Compiling...
+Skipping... (no relevant changes detected)
+g_control_dll.cpp
+
+
+
+<h3>Results</h3>
+g_control_dll.obj - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

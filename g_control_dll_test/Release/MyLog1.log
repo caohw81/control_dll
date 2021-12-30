@@ -1,0 +1,78 @@
+2021-12-25 10:07:21.628 init dll
+2021-12-25 10:14:00.308 g_setCellConfig&&ipIndex:1,carNum:0,mcc:460,mnc:00,lac:3080,ci:8003,tac:60,carrier:60,downAtten:30
+2021-12-25 10:14:02.065 setCellConfig Ok & ipIndex:1,carNum:0
+2021-12-25 10:15:25.972 g_setRunningMode&&ipIndex:1,carNum:0,controlMode:0,workMode:0,msgSendMode:0
+2021-12-25 10:15:27.579 setRunningMode Ok & ipIndex:1,carNum:0
+2021-12-25 10:16:15.388 g_turnOnRF&&ipIndex:1,carNum:0
+2021-12-25 10:16:15.389 turnOnRF Ok & ipIndex:1,carNum:0
+2021-12-25 10:17:25.835 g_turnOnRF&&ipIndex:1,carNum:0
+2021-12-25 10:17:25.837 turnOnRF Ok & ipIndex:1,carNum:0
+2021-12-25 10:18:10.084 g_turnOffRF&&ipIndex:1,carNum:0
+2021-12-25 10:18:10.087 turnOffRF Ok & ipIndex:1,carNum:0
+2021-12-25 10:19:36.947 g_restartSystem&&ipIndex:1,carNum:0
+2021-12-25 10:19:36.948 restartSystem Ok & ipIndex:1,carNum:0
+2021-12-25 10:22:36.028 g_turnOffRF&&ipIndex:1,carNum:0
+2021-12-25 10:22:36.030 turnOffRF Ok & ipIndex:1,carNum:0
+2021-12-25 10:22:48.523 g_checkBlackImsi&&ipIndex:1,carNum:0
+2021-12-25 10:22:48.528 checkBlackImsi Ok & ipIndex:1,carNum:0,imsi:460015952100828
+2021-12-25 10:24:12.827 g_checkBlackImsi&&ipIndex:1,carNum:0
+2021-12-25 10:24:12.831 checkBlackImsi Ok & ipIndex:1,carNum:0,imsi:460015952100828
+2021-12-25 10:33:53.259 g_checkBlackImsi&&ipIndex:1,carNum:0
+2021-12-25 10:33:53.263 checkBlackImsi Ok & ipIndex:1,carNum:0,imsi:460015952100828
+2021-12-25 10:33:55.379 g_checkWhiteImsi&&ipIndex:1,carNum:0
+2021-12-25 10:33:55.382 checkWhiteImsi Ok & ipIndex:1,carNum:0,imsi:123456789012345
+2021-12-25 10:33:55.384 checkWhiteImsi Ok & ipIndex:1,carNum:0,imsi:123455432112345
+2021-12-25 10:33:56.795 g_clearBlackImsiList&&ipIndex:1,carNum:0
+2021-12-25 10:33:57.720 clearBlackImsi Ok & ipIndex:1,carNum:0
+2021-12-25 10:33:58.466 g_clearWhiteImsiList&&ipIndex:1,carNum:0
+2021-12-25 10:33:59.504 clearWhiteImsi Ok & ipIndex:1,carNum:0
+2021-12-25 10:33:59.899 g_checkBlackImsi&&ipIndex:1,carNum:0
+2021-12-25 10:34:01.715 g_checkWhiteImsi&&ipIndex:1,carNum:0
+2021-12-26 16:35:59.118 init dll
+2021-12-26 16:36:04.642 g_carrFrePointCheck&&ipIndex:1,carNum:0
+2021-12-26 16:36:42.918 init dll
+2021-12-26 16:36:42.922 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:36:42.947 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:36:45.210 g_carrFrePointCheck&&ipIndex:1,carNum:0
+2021-12-26 16:36:47.949 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:36:47.964 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:36:52.974 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:36:52.989 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:36:57.993 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:36:58.009 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:37:02.876 g_carrFrePointCheck&&ipIndex:1,carNum:1
+2021-12-26 16:37:03.017 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:37:03.033 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:37:08.038 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:37:08.053 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:37:13.065 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:37:13.081 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:37:18.087 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:37:18.101 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:44:48.883 init dll
+2021-12-26 16:44:48.885 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:44:48.910 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:44:50.628 g_carrFrePointCheck&&ipIndex:1,carNum:0
+2021-12-26 16:44:53.912 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:44:53.927 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:44:58.940 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:44:58.955 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:45:03.958 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:45:03.973 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:45:08.981 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:45:08.996 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:45:14.005 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:45:14.020 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:45:19.035 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:45:19.049 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:45:24.060 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:45:24.076 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:45:29.087 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:45:29.101 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:45:34.110 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:45:34.125 heatBeat & ipIndex:1,carNum:1
+2021-12-26 16:45:39.127 heatBeat & ipIndex:1,carNum:0
+2021-12-26 16:45:39.142 heatBeat & ipIndex:1,carNum:1
+2021-12-27 02:24:45.750 init dll
+2021-12-27 02:24:48.712 g_carrFrePointCheck&&ipIndex:1,carNum:0
+2021-12-27 02:24:50.912 g_carrFrePointCheck&&ipIndex:1,carNum:0

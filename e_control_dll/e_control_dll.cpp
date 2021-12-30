@@ -1,5 +1,5 @@
 // e_control_dll.cpp : Defines the initialization routines for the DLL.
-//
+
 
 #include "stdafx.h"
 #include "e_control_dll.h"
@@ -328,7 +328,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 				int m_status=status_char_convert[0];
 				//printf("heartbeat status:%d\n",m_status);
 				//AfxMessageBox("0");
-				Log("status_response@@ipIndex:%d, m_status:%d",ipIndex,m_status);
+				Log("4g_status_response@@ipIndex:%d, m_status:%d",ipIndex,m_status);
 				(*pStatusFun)(ipIndex,0,m_status);	
 			}
 		}
@@ -378,7 +378,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			const char *maxTxPower_char = p_maxTxPower->GetText();
 			cellInfo.maxTxPower=atoi(maxTxPower_char);	
 	
-			Log("femto_status@@ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d",ipIndex, cellInfo.euarfcn,cellInfo.mcc,cellInfo.mnc,cellInfo.pci);
+			Log("4g_femto_status@@ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d",ipIndex, cellInfo.euarfcn,cellInfo.mcc,cellInfo.mnc,cellInfo.pci);
 			(*pCellStatusResponseFun)(ipIndex, m_status, &cellInfo);
 		}
 		else if(secLeaf_str=="set_configuration_result"){	//%%小区设置
@@ -390,7 +390,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 				//CString str;
 				//str.Format("config status:%d",m_status);
 				//AfxMessageBox(str);
-				Log("set_configuration_result@@ipIndex:%d,m_result:%d",ipIndex, m_result);
+				Log("4g_set_configuration_result@@ipIndex:%d,m_result:%d",ipIndex, m_result);
 				(*pStatusFun)(ipIndex, 1,m_result); 				
 			}
 		}
@@ -399,7 +399,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			const char *result_char = p_result->GetText(); 
 			int m_result=atoi(result_char);
 			//printf("set_redirection_rsp result:%d\n",m_result);
-			Log("set_redirection_rsp@@ipIndex:%d,m_result:%d",ipIndex,m_result);
+			Log("4g_set_redirection_rsp@@ipIndex:%d,m_result:%d",ipIndex,m_result);
 			(*pStatusFun)(ipIndex, 2,m_result); 
 		}
 		else if(secLeaf_str=="activate_nodeb_result"){		//%%激活小区
@@ -407,7 +407,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			const char *result_char = p_result->GetText();
 			int m_result=atoi(result_char);
 			//printf("activate_nodeb_result result:%d\n",m_result);
-			Log("activate_nodeb_result@@ipIndex:%d, m_result:%d",ipIndex, m_result);
+			Log("4g_activate_nodeb_result@@ipIndex:%d, m_result:%d",ipIndex, m_result);
 			(*pStatusFun)(ipIndex, 3,m_result); 
 		}
 		else if(secLeaf_str=="imsi_list_config_result"){	//%%黑白名单添加
@@ -415,7 +415,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			const char *result_char = p_result->GetText();
 			int m_result=atoi(result_char);
 			//printf("imsi_list_config_result result:%d\n",m_result);
-			Log("imsi_list_config_result@@ipIndex:%d,m_result:%d",ipIndex, m_result);
+			Log("4g_imsi_list_config_result@@ipIndex:%d,m_result:%d",ipIndex, m_result);
 			(*pStatusFun)(ipIndex, 4,m_result); 
 		}
 		else if(secLeaf_str=="imsi_list_check_result"){		//%%黑白名单查询
@@ -426,7 +426,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 				if(p_w_imsi){
 					while(p_w_imsi){
 						string imsi = p_w_imsi->GetText();
-						Log("imsi_list_check_result@@ipIndex:%d, whiteimsi:%s",ipIndex, imsi.c_str());
+						Log("4g_imsi_list_check_result@@ipIndex:%d, whiteimsi:%s",ipIndex, imsi.c_str());
 						whiteVec.push_back(imsi);
 						p_w_imsi=p_w_imsi->NextSiblingElement();
 					}
@@ -438,10 +438,12 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 							memcpy(&whiteImsiList[i*15],whiteVec[i].c_str(),15);
 							//whiteImsiList[i][15]='\0';
 						}
+						Log("4g_imsi_list_check_result@@ipIndex:%d, white imsi Num:%d",ipIndex, imsiNum);
 						(*pWhiteImsiCheckFun)(ipIndex, whiteImsiList,imsiNum );
 						free(whiteImsiList);
 					}					
 				}else{
+					Log("4g_imsi_list_check_result@@ipIndex:%d, white imsiNum:%d",ipIndex, 0);
 					(*pWhiteImsiCheckFun)(ipIndex, "NULL",0 );
 				}			
 			}
@@ -451,7 +453,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 				if(p_b_imsi){
 					while(p_b_imsi){
 						string imsi = p_b_imsi->GetText();
-						Log("imsi_list_check_result@@ipIndex:%d, blackimsi:%s",ipIndex, imsi.c_str());
+						Log("4g_imsi_list_check_result@@ipIndex:%d, blackimsi:%s",ipIndex, imsi.c_str());
 						blackVec.push_back(imsi);
 						p_b_imsi=p_b_imsi->NextSiblingElement();
 						p_b_imsi=p_b_imsi->NextSiblingElement();
@@ -464,10 +466,13 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 						for(int i=0;i<imsiNum;++i){
 							memcpy(&blackImsiList[i*15],blackVec[i].c_str(),15);
 						}
+						Log("4g_imsi_list_check_result@@ipIndex:%d, black imsi Num:%d",ipIndex, imsiNum);
+
 						(*pBlackImsiCheckFun)(ipIndex, blackImsiList,imsiNum );						
 						free(blackImsiList);
 					}				
 				}else{
+					Log("4g_imsi_list_check_result@@ipIndex:%d, black imsiNum:%d",ipIndex, 0);
 					(*pBlackImsiCheckFun)(ipIndex, "NULL",0 );		
 				}
 				
@@ -479,7 +484,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			const char *result_char = P_result->GetText();
 			int m_result=atoi(result_char);
 			//printf("imsi_list_delconfig_result result:%d\n",m_result);
-			Log("imsi_list_delconfig_result@@ipIndex:%d, m_result:%d",ipIndex, m_result);
+			Log("4g_imsi_list_delconfig_result@@ipIndex:%d, m_result:%d",ipIndex, m_result);
 			(*pStatusFun)(ipIndex, 5,m_result); 			
 		}
 		else if(secLeaf_str=="scanner"){					//%%捕号IMSI上报
@@ -513,7 +518,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			
 			imsiInfo.rsrp=m_rsrp;
 
-			Log("scanner@@ipIndex:%d, userType:%d,imsi:%s,imei:%s,rsrp:%d",ipIndex, m_userType,imsi_char,imei_char,m_rsrp);
+			Log("4g_scanner@@ipIndex:%d, userType:%d,imsi:%s,imei:%s,rsrp:%d",ipIndex, m_userType,imsi_char,imei_char,m_rsrp);
 			(*pIMSIReportFun)(&imsiInfo);			
 		}
 	}
@@ -590,7 +595,7 @@ DllExport void e_femtoStatusRequest(int ipIndex){
 
 	buff[lenth]='\0';
 	
-	Log("femto_status_request@@ipIndex:%d",ipIndex);
+	Log("4g_femto_status_request@@ipIndex:%d",ipIndex);
 	if (udpConnectFlag){
 		sendMsg(ipIndex,buff,lenth-1);
 	}
@@ -600,7 +605,7 @@ DllExport void e_femtoStatusRequest(int ipIndex){
 	strXML.ReleaseBuffer();
 }
 
-DllExport void e_setCellConfig(int ipIndex, int euarfcn, int mcc,char* mnc, int pci, int tac, int txpower, int periodTac, int bandwidth, char* cellid){
+/*DllExport void e_setCellConfig(int ipIndex, int euarfcn, int mcc,char* mnc, int pci, int tac, int txpower, int periodTac, int bandwidth, char* cellid){
 	TiXmlDocument *docXml = new TiXmlDocument();
 	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "UTF-8", "");
 	docXml->LinkEndChild(decl);
@@ -676,29 +681,25 @@ DllExport void e_setCellConfig(int ipIndex, int euarfcn, int mcc,char* mnc, int 
 	lenth=strXML.GetLength();
 	buff = new char [lenth+1];
 	sprintf(buff,_T("%s"),strXML); 
-
-
-/*	const char* p_buff= strXML.CStr();
-	int lenth=strlen(p_buff);
-	if(lenth == 0)
-        return ;
-    buff = new char[lenth+1 ];
-    memcpy(buff, p_buff,lenth);
-*/	
+	
 	buff[lenth]='\0';
 #endif
-
-	Log("setCellConfig@@ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d,tac:%d,periodTac:%d,bandwidth:%d,cellid:%s",ipIndex, euarfcn,mcc,mnc,pci,tac,periodTac,bandwidth,cellid);
+	
 	if (udpConnectFlag){
-		sendMsg(ipIndex,buff,lenth-1);
+		Log("4g_setCellConfig send begin.");
+		if(sendMsg(ipIndex,buff,lenth-1)>0){
+			Log("4g_setCellConfig@@ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d,tac:%d,periodTac:%d,bandwidth:%d,cellid:%s",ipIndex, euarfcn,mcc,mnc,pci,tac,periodTac,bandwidth,cellid);
+		}
 	}
 	delete docXml;
 	docXml = NULL;
 	delete[] buff;
 	strXML.ReleaseBuffer();
 }
+*/
 
-DllExport void e_setRedirection(int ipIndex, int category, char* priority,int GeranRedirect, int arfcn, int UtranRedirect, int uarfcn, int EutranRedirect, int earfcn,int RejectMethod){
+
+DllExport void e_setCellConfig(int ipIndex, int euarfcn, int mcc,char* mnc, int pci, int tac, int txpower, int periodTac, int bandwidth, char* cellid){
 	TiXmlDocument *docXml = new TiXmlDocument();
 	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "UTF-8", "");
 	docXml->LinkEndChild(decl);
@@ -706,6 +707,121 @@ DllExport void e_setRedirection(int ipIndex, int category, char* priority,int Ge
 	TiXmlElement *rootElement = new TiXmlElement("message_content");
 	docXml->LinkEndChild(rootElement);
 
+	TiXmlElement *configurationElement = new TiXmlElement("set_configuration");
+    rootElement->LinkEndChild(configurationElement);
+	
+	TiXmlElement *euarfcnElement = new TiXmlElement("euarfcn");
+    configurationElement->LinkEndChild(euarfcnElement);
+	TiXmlText *euarfcnContent = new TiXmlText(itoa(euarfcn));
+	euarfcnElement->LinkEndChild(euarfcnContent);
+
+	TiXmlElement *mccElement = new TiXmlElement("mcc");
+    configurationElement->LinkEndChild(mccElement);
+	TiXmlText *mccContent = new TiXmlText(itoa(mcc));
+	mccElement->LinkEndChild(mccContent);
+	
+	TiXmlElement *mncElement = new TiXmlElement("mnc");
+    configurationElement->LinkEndChild(mncElement);
+	TiXmlText *mncContent = new TiXmlText(mnc);
+	mncElement->LinkEndChild(mncContent);
+	
+	TiXmlElement *pciElement = new TiXmlElement("pci");
+    configurationElement->LinkEndChild(pciElement);
+	TiXmlText *pciContent = new TiXmlText(itoa(pci));
+	pciElement->LinkEndChild(pciContent);
+
+	TiXmlElement *tacElement = new TiXmlElement("tac");
+    configurationElement->LinkEndChild(tacElement);
+	TiXmlText *tacContent = new TiXmlText(itoa(tac));
+	tacElement->LinkEndChild(tacContent);
+
+	TiXmlPrinter *printer = new TiXmlPrinter();
+	rootElement->Accept(printer );//保存该节点及其子节点到字符串
+	CString strXML = printer->CStr();
+	
+	char *buff;
+	int lenth=strXML.GetLength();
+	buff = new char [lenth+1];
+	sprintf(buff,_T("%s"),strXML); 
+	
+	buff[lenth]='\0';
+	
+	if (udpConnectFlag){
+		Log("4g_setCellConfig send begin.");
+		if(sendMsg(ipIndex,buff,lenth-1)>0){
+			Log("4g_setCellConfig@@ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d,tac:%d,periodTac:%d,bandwidth:%d,cellid:%s",ipIndex, euarfcn,mcc,mnc,pci,tac,periodTac,bandwidth,cellid);
+		}
+	}
+	delete docXml;
+	docXml = NULL;
+	delete[] buff;
+	strXML.ReleaseBuffer();
+	
+	Sleep(50);
+//==========================================
+	TiXmlDocument *docXml2 = new TiXmlDocument();
+	TiXmlDeclaration* decl2 = new TiXmlDeclaration("1.0", "UTF-8", "");
+	docXml2->LinkEndChild(decl2);
+
+	TiXmlElement *rootElement2 = new TiXmlElement("message_content");
+	docXml2->LinkEndChild(rootElement2);
+
+	TiXmlElement *configurationElement2 = new TiXmlElement("set_configuration");
+    rootElement2->LinkEndChild(configurationElement2);
+	
+	TiXmlElement *txpowerElement2 = new TiXmlElement("txpower");
+    configurationElement2->LinkEndChild(txpowerElement2);
+	TiXmlText *txpowerContent2 = new TiXmlText(itoa(txpower));
+	txpowerElement2->LinkEndChild(txpowerContent2);
+	
+	TiXmlElement *periodTacElement2 = new TiXmlElement("periodTac");
+    configurationElement2->LinkEndChild(periodTacElement2);
+	TiXmlText *periodTacContent2 = new TiXmlText(itoa(periodTac));
+	periodTacElement2->LinkEndChild(periodTacContent2);
+	
+	TiXmlElement *bandwidthElement2 = new TiXmlElement("bandwidth");
+    configurationElement2->LinkEndChild(bandwidthElement2);
+	TiXmlText *bandwidthContent2 = new TiXmlText(itoa(bandwidth));
+	bandwidthElement2->LinkEndChild(bandwidthContent2);
+	
+	TiXmlElement *cellidElement2 = new TiXmlElement("cellid");
+    configurationElement2->LinkEndChild(cellidElement2);
+	TiXmlText *cellidContent2 = new TiXmlText(cellid);
+	cellidElement2->LinkEndChild(cellidContent2);
+	
+
+	TiXmlPrinter *printer2 = new TiXmlPrinter();
+	rootElement2->Accept(printer2);//保存该节点及其子节点到字符串
+	CString strXML2 = printer2->CStr();
+	
+	char *buff2;
+	int lenth2=strXML2.GetLength();
+	buff2 = new char [lenth2+1];
+	sprintf(buff2,_T("%s"),strXML2); 
+	
+	buff2[lenth2]='\0';
+	
+	if (udpConnectFlag){
+		Log("4g_setCellConfig send begin2.");
+		if(sendMsg(ipIndex,buff2,lenth2-1)>0){
+			Log("4g_setCellConfig2@@ipIndex:%d,txpower:%d, periodTac:%d,bandwidth:%d,cellid:%s",ipIndex,txpower, periodTac,bandwidth,cellid);
+		}
+	}
+	delete docXml2;
+	docXml2 = NULL;
+	delete[] buff2;
+	strXML2.ReleaseBuffer();		
+}
+
+/*DllExport void e_setRedirection(int ipIndex, int category, char* priority,int GeranRedirect, int arfcn, int UtranRedirect, int uarfcn, int EutranRedirect, int earfcn,int RejectMethod){
+	TiXmlDocument *docXml = new TiXmlDocument();
+	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "UTF-8", "");
+	docXml->LinkEndChild(decl);
+
+	TiXmlElement *rootElement = new TiXmlElement("message_content");
+	docXml->LinkEndChild(rootElement);
+	
+//====================================
 	TiXmlElement *redirection_reqElement = new TiXmlElement("set_redirection_req");
     rootElement->LinkEndChild(redirection_reqElement);
 	
@@ -754,6 +870,297 @@ DllExport void e_setRedirection(int ipIndex, int category, char* priority,int Ge
 	TiXmlText *RejectMethodContent = new TiXmlText(itoa(RejectMethod));
 	RejectMethodElement->LinkEndChild(RejectMethodContent);
 
+//======================================
+	TiXmlElement *redirection_reqElement2 = new TiXmlElement("set_redirection_req");
+    rootElement->LinkEndChild(redirection_reqElement2);
+	
+	TiXmlElement *categoryElement2 = new TiXmlElement("category");
+    redirection_reqElement2->LinkEndChild(categoryElement2);
+	TiXmlText *categoryContent2 = new TiXmlText(itoa(1));
+	categoryElement2->LinkEndChild(categoryContent2);
+
+	TiXmlElement *priorityElement2 = new TiXmlElement("priority");
+    redirection_reqElement2->LinkEndChild(priorityElement2);
+	TiXmlText *priorityContent2 = new TiXmlText(itoa(5));
+	priorityElement2->LinkEndChild(priorityContent2);
+
+	TiXmlElement *GeranRedirectElement2 = new TiXmlElement("GeranRedirect");
+    redirection_reqElement2->LinkEndChild(GeranRedirectElement2);	
+	TiXmlText *GeranRedirectContent2 = new TiXmlText(itoa(0));
+	GeranRedirectElement2->LinkEndChild(GeranRedirectContent2);
+	
+	TiXmlElement *arfcnElement2 = new TiXmlElement("arfcn");
+    redirection_reqElement2->LinkEndChild(arfcnElement2);
+	TiXmlText *arfcnContent2 = new TiXmlText(itoa(0));
+	arfcnElement2->LinkEndChild(arfcnContent2);
+	
+	TiXmlElement *UtranRedirectElement2 = new TiXmlElement("UtranRedirect");
+    redirection_reqElement2->LinkEndChild(UtranRedirectElement2);
+	TiXmlText *UtranRedirectContent2 = new TiXmlText(itoa(0));
+	UtranRedirectElement2->LinkEndChild(UtranRedirectContent2);
+	
+	TiXmlElement *uarfcnTacElement2 = new TiXmlElement("uarfcn");
+    redirection_reqElement2->LinkEndChild(uarfcnTacElement2);
+	TiXmlText *uarfcnTacContent2 = new TiXmlText(itoa(0));
+	uarfcnTacElement2->LinkEndChild(uarfcnTacContent2);
+	
+	TiXmlElement *EutranRedirectElement2 = new TiXmlElement("EutranRedirect");
+    redirection_reqElement2->LinkEndChild(EutranRedirectElement2);
+	TiXmlText *EutranRedirectContent2 = new TiXmlText(itoa(0));
+	EutranRedirectElement2->LinkEndChild(EutranRedirectContent2);
+	
+	TiXmlElement *earfcnElement2 = new TiXmlElement("earfcn");
+    redirection_reqElement2->LinkEndChild(earfcnElement2);
+	TiXmlText *earfcnContent2 = new TiXmlText(itoa(0));
+	earfcnElement2->LinkEndChild(earfcnContent2);
+
+	TiXmlElement *RejectMethodElement2 = new TiXmlElement("RejectMethod");
+    redirection_reqElement2->LinkEndChild(RejectMethodElement2);
+	TiXmlText *RejectMethodContent2 = new TiXmlText(itoa(1));
+	RejectMethodElement2->LinkEndChild(RejectMethodContent2);
+
+//======================================
+	TiXmlElement *redirection_reqElement3 = new TiXmlElement("set_redirection_req");
+    rootElement->LinkEndChild(redirection_reqElement3);
+	
+	TiXmlElement *categoryElement3 = new TiXmlElement("category");
+    redirection_reqElement3->LinkEndChild(categoryElement3);
+	TiXmlText *categoryContent3 = new TiXmlText(itoa(2));
+	categoryElement3->LinkEndChild(categoryContent3);
+
+	TiXmlElement *priorityElement3 = new TiXmlElement("priority");
+    redirection_reqElement3->LinkEndChild(priorityElement3);
+	TiXmlText *priorityContent3 = new TiXmlText(itoa(5));
+	priorityElement3->LinkEndChild(priorityContent3);
+
+	TiXmlElement *GeranRedirectElement3 = new TiXmlElement("GeranRedirect");
+    redirection_reqElement3->LinkEndChild(GeranRedirectElement3);	
+	TiXmlText *GeranRedirectContent3 = new TiXmlText(itoa(0));
+	GeranRedirectElement3->LinkEndChild(GeranRedirectContent3);
+	
+	TiXmlElement *arfcnElement3 = new TiXmlElement("arfcn");
+    redirection_reqElement3->LinkEndChild(arfcnElement3);
+	TiXmlText *arfcnContent3 = new TiXmlText(itoa(0));
+	arfcnElement3->LinkEndChild(arfcnContent3);
+	
+	TiXmlElement *UtranRedirectElement3 = new TiXmlElement("UtranRedirect");
+    redirection_reqElement3->LinkEndChild(UtranRedirectElement3);
+	TiXmlText *UtranRedirectContent3 = new TiXmlText(itoa(0));
+	UtranRedirectElement3->LinkEndChild(UtranRedirectContent3);
+	
+	TiXmlElement *uarfcnTacElement3 = new TiXmlElement("uarfcn");
+    redirection_reqElement3->LinkEndChild(uarfcnTacElement3);
+	TiXmlText *uarfcnTacContent3 = new TiXmlText(itoa(0));
+	uarfcnTacElement3->LinkEndChild(uarfcnTacContent3);
+	
+	TiXmlElement *EutranRedirectElement3 = new TiXmlElement("EutranRedirect");
+    redirection_reqElement3->LinkEndChild(EutranRedirectElement3);
+	TiXmlText *EutranRedirectContent3 = new TiXmlText(itoa(0));
+	EutranRedirectElement3->LinkEndChild(EutranRedirectContent3);
+	
+	TiXmlElement *earfcnElement3 = new TiXmlElement("earfcn");
+    redirection_reqElement3->LinkEndChild(earfcnElement3);
+	TiXmlText *earfcnContent3 = new TiXmlText(itoa(0));
+	earfcnElement3->LinkEndChild(earfcnContent3);
+
+	TiXmlElement *RejectMethodElement3 = new TiXmlElement("RejectMethod");
+    redirection_reqElement3->LinkEndChild(RejectMethodElement3);
+	TiXmlText *RejectMethodContent3 = new TiXmlText(itoa(1));
+	RejectMethodElement3->LinkEndChild(RejectMethodContent3);
+	
+//==============================
+
+
+	TiXmlPrinter *printer = new TiXmlPrinter();
+	rootElement->Accept(printer );//保存该节点及其子节点到字符串
+	CString strXML = printer->CStr();
+	
+	char *buff;
+	int lenth=0;
+#ifdef _UNICODE 
+	lenth = WideCharToMultiByte(CP_ACP, 0, strXML, strXML.GetLength(), NULL, 0, NULL, NULL);
+	buff = new char[lenth+1];
+    memset(buff,0,lenth + 1);
+	WideCharToMultiByte(CP_ACP,0,strXML,strXML.GetLength(),buff,lenth,NULL,NULL);
+	buff[lenth+1]='\0';
+#else
+	//lenth=strXML.GetAllocLength();
+	lenth=strXML.GetLength();
+	buff = new char [lenth+1];
+	sprintf(buff,_T("%s"),strXML); 
+	
+	buff[lenth]='\0';
+#endif
+	Log("4g_setRedirection@@ipIndex:%d,%s",buff);
+	Log("4g_setRedirection@@ipIndex:%d, category:%d,priority:%s,GeranRedirect:%d,arfcn:%d,UtranRedirect:%d,uarfcn:%d,EutranRedirect:%d,earfcn:%d,RejectMethod:%d",ipIndex, category, priority,GeranRedirect, arfcn, UtranRedirect, uarfcn, EutranRedirect, earfcn,RejectMethod);
+	if (udpConnectFlag){
+		sendMsg(ipIndex, buff,lenth-1);
+	}
+	delete docXml;
+	docXml = NULL;
+	delete[] buff;
+	strXML.ReleaseBuffer();
+}
+*/
+
+DllExport void e_setBlackRedirection(int ipIndex, int arfcn){
+	TiXmlDocument *docXml = new TiXmlDocument();
+	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "UTF-8", "");
+	docXml->LinkEndChild(decl);
+
+	TiXmlElement *rootElement = new TiXmlElement("message_content");
+	docXml->LinkEndChild(rootElement);
+	
+//======================================
+	TiXmlElement *redirection_reqElement = new TiXmlElement("set_redirection_req");
+    rootElement->LinkEndChild(redirection_reqElement);
+	
+	TiXmlElement *categoryElement = new TiXmlElement("category");
+    redirection_reqElement->LinkEndChild(categoryElement);
+	TiXmlText *categoryContent = new TiXmlText(itoa(0));
+	categoryElement->LinkEndChild(categoryContent);
+
+	TiXmlElement *priorityElement = new TiXmlElement("priority");
+    redirection_reqElement->LinkEndChild(priorityElement);
+	TiXmlText *priorityContent = new TiXmlText(itoa(2));
+	priorityElement->LinkEndChild(priorityContent);
+
+	TiXmlElement *GeranRedirectElement = new TiXmlElement("GeranRedirect");
+    redirection_reqElement->LinkEndChild(GeranRedirectElement);	
+	TiXmlText *GeranRedirectContent = new TiXmlText(itoa(0));
+	GeranRedirectElement->LinkEndChild(GeranRedirectContent);
+	
+	TiXmlElement *arfcnElement = new TiXmlElement("arfcn");
+    redirection_reqElement->LinkEndChild(arfcnElement);
+	TiXmlText *arfcnContent = new TiXmlText(itoa(arfcn));
+	arfcnElement->LinkEndChild(arfcnContent);
+	
+	TiXmlElement *UtranRedirectElement = new TiXmlElement("UtranRedirect");
+    redirection_reqElement->LinkEndChild(UtranRedirectElement);
+	TiXmlText *UtranRedirectContent = new TiXmlText(itoa(0));
+	UtranRedirectElement->LinkEndChild(UtranRedirectContent);
+	
+	TiXmlElement *uarfcnTacElement = new TiXmlElement("uarfcn");
+    redirection_reqElement->LinkEndChild(uarfcnTacElement);
+	TiXmlText *uarfcnTacContent = new TiXmlText(itoa(0));
+	uarfcnTacElement->LinkEndChild(uarfcnTacContent);
+	
+	TiXmlElement *EutranRedirectElement = new TiXmlElement("EutranRedirect");
+    redirection_reqElement->LinkEndChild(EutranRedirectElement);
+	TiXmlText *EutranRedirectContent = new TiXmlText(itoa(0));
+	EutranRedirectElement->LinkEndChild(EutranRedirectContent);
+	
+	TiXmlElement *earfcnElement = new TiXmlElement("earfcn");
+    redirection_reqElement->LinkEndChild(earfcnElement);
+	TiXmlText *earfcnContent = new TiXmlText(itoa(0));
+	earfcnElement->LinkEndChild(earfcnContent);
+
+	TiXmlElement *RejectMethodElement = new TiXmlElement("RejectMethod");
+    redirection_reqElement->LinkEndChild(RejectMethodElement);
+	TiXmlText *RejectMethodContent = new TiXmlText(itoa(1));
+	RejectMethodElement->LinkEndChild(RejectMethodContent);
+
+//======================================
+	TiXmlElement *redirection_reqElement2 = new TiXmlElement("set_redirection_req");
+    rootElement->LinkEndChild(redirection_reqElement2);
+	
+	TiXmlElement *categoryElement2 = new TiXmlElement("category");
+    redirection_reqElement2->LinkEndChild(categoryElement2);
+	TiXmlText *categoryContent2 = new TiXmlText(itoa(1));
+	categoryElement2->LinkEndChild(categoryContent2);
+
+	TiXmlElement *priorityElement2 = new TiXmlElement("priority");
+    redirection_reqElement2->LinkEndChild(priorityElement2);
+	TiXmlText *priorityContent2 = new TiXmlText(itoa(5));
+	priorityElement2->LinkEndChild(priorityContent2);
+
+	TiXmlElement *GeranRedirectElement2 = new TiXmlElement("GeranRedirect");
+    redirection_reqElement2->LinkEndChild(GeranRedirectElement2);	
+	TiXmlText *GeranRedirectContent2 = new TiXmlText(itoa(0));
+	GeranRedirectElement2->LinkEndChild(GeranRedirectContent2);
+	
+	TiXmlElement *arfcnElement2 = new TiXmlElement("arfcn");
+    redirection_reqElement2->LinkEndChild(arfcnElement2);
+	TiXmlText *arfcnContent2 = new TiXmlText(itoa(0));
+	arfcnElement2->LinkEndChild(arfcnContent2);
+	
+	TiXmlElement *UtranRedirectElement2 = new TiXmlElement("UtranRedirect");
+    redirection_reqElement2->LinkEndChild(UtranRedirectElement2);
+	TiXmlText *UtranRedirectContent2 = new TiXmlText(itoa(0));
+	UtranRedirectElement2->LinkEndChild(UtranRedirectContent2);
+	
+	TiXmlElement *uarfcnTacElement2 = new TiXmlElement("uarfcn");
+    redirection_reqElement2->LinkEndChild(uarfcnTacElement2);
+	TiXmlText *uarfcnTacContent2 = new TiXmlText(itoa(0));
+	uarfcnTacElement2->LinkEndChild(uarfcnTacContent2);
+	
+	TiXmlElement *EutranRedirectElement2 = new TiXmlElement("EutranRedirect");
+    redirection_reqElement2->LinkEndChild(EutranRedirectElement2);
+	TiXmlText *EutranRedirectContent2 = new TiXmlText(itoa(0));
+	EutranRedirectElement2->LinkEndChild(EutranRedirectContent2);
+	
+	TiXmlElement *earfcnElement2 = new TiXmlElement("earfcn");
+    redirection_reqElement2->LinkEndChild(earfcnElement2);
+	TiXmlText *earfcnContent2 = new TiXmlText(itoa(0));
+	earfcnElement2->LinkEndChild(earfcnContent2);
+
+	TiXmlElement *RejectMethodElement2 = new TiXmlElement("RejectMethod");
+    redirection_reqElement2->LinkEndChild(RejectMethodElement2);
+	TiXmlText *RejectMethodContent2 = new TiXmlText(itoa(1));
+	RejectMethodElement2->LinkEndChild(RejectMethodContent2);
+
+//=====================================
+	TiXmlElement *redirection_reqElement3 = new TiXmlElement("set_redirection_req");
+    rootElement->LinkEndChild(redirection_reqElement3);
+	
+	TiXmlElement *categoryElement3 = new TiXmlElement("category");
+    redirection_reqElement3->LinkEndChild(categoryElement3);
+	TiXmlText *categoryContent3 = new TiXmlText(itoa(2));
+	categoryElement3->LinkEndChild(categoryContent3);
+
+	TiXmlElement *priorityElement3 = new TiXmlElement("priority");
+    redirection_reqElement3->LinkEndChild(priorityElement3);
+	TiXmlText *priorityContent3 = new TiXmlText(itoa(5));
+	priorityElement3->LinkEndChild(priorityContent3);
+
+	TiXmlElement *GeranRedirectElement3 = new TiXmlElement("GeranRedirect");
+    redirection_reqElement3->LinkEndChild(GeranRedirectElement3);	
+	TiXmlText *GeranRedirectContent3 = new TiXmlText(itoa(0));
+	GeranRedirectElement3->LinkEndChild(GeranRedirectContent3);
+	
+	TiXmlElement *arfcnElement3 = new TiXmlElement("arfcn");
+    redirection_reqElement3->LinkEndChild(arfcnElement3);
+	TiXmlText *arfcnContent3 = new TiXmlText(itoa(0));
+	arfcnElement3->LinkEndChild(arfcnContent3);
+	
+	TiXmlElement *UtranRedirectElement3 = new TiXmlElement("UtranRedirect");
+    redirection_reqElement3->LinkEndChild(UtranRedirectElement3);
+	TiXmlText *UtranRedirectContent3 = new TiXmlText(itoa(0));
+	UtranRedirectElement3->LinkEndChild(UtranRedirectContent3);
+	
+	TiXmlElement *uarfcnTacElement3 = new TiXmlElement("uarfcn");
+    redirection_reqElement3->LinkEndChild(uarfcnTacElement3);
+	TiXmlText *uarfcnTacContent3 = new TiXmlText(itoa(0));
+	uarfcnTacElement3->LinkEndChild(uarfcnTacContent3);
+	
+	TiXmlElement *EutranRedirectElement3 = new TiXmlElement("EutranRedirect");
+    redirection_reqElement3->LinkEndChild(EutranRedirectElement3);
+	TiXmlText *EutranRedirectContent3 = new TiXmlText(itoa(0));
+	EutranRedirectElement3->LinkEndChild(EutranRedirectContent3);
+	
+	TiXmlElement *earfcnElement3 = new TiXmlElement("earfcn");
+    redirection_reqElement3->LinkEndChild(earfcnElement3);
+	TiXmlText *earfcnContent3 = new TiXmlText(itoa(0));
+	earfcnElement3->LinkEndChild(earfcnContent3);
+
+	TiXmlElement *RejectMethodElement3 = new TiXmlElement("RejectMethod");
+    redirection_reqElement3->LinkEndChild(RejectMethodElement3);
+	TiXmlText *RejectMethodContent3 = new TiXmlText(itoa(1));
+	RejectMethodElement3->LinkEndChild(RejectMethodContent3);
+	
+//==============================
+
+
 	TiXmlPrinter *printer = new TiXmlPrinter();
 	rootElement->Accept(printer );//保存该节点及其子节点到字符串
 	CString strXML = printer->CStr();
@@ -772,21 +1179,209 @@ DllExport void e_setRedirection(int ipIndex, int category, char* priority,int Ge
 	buff = new char [lenth+1];
 	sprintf(buff,_T("%s"),strXML); 
 
-
-/*	const char* p_buff= strXML.CStr();
-	int lenth=strlen(p_buff);
-	if(lenth == 0)
-        return ;
-    buff = new char[lenth+1 ];
-    memcpy(buff, p_buff,lenth);
-*/	
 	buff[lenth]='\0';
 #endif
-
-	Log("setRedirection@@ipIndex:%d, category:%d,priority:%s,GeranRedirect:%d,arfcn:%d,UtranRedirect:%d,uarfcn:%d,EutranRedirect:%d,earfcn:%d,RejectMethod:%d",ipIndex, category, priority,GeranRedirect, arfcn, UtranRedirect, uarfcn, EutranRedirect, earfcn,RejectMethod);
+	
+	
 	if (udpConnectFlag){
-		sendMsg(ipIndex, buff,lenth-1);
+		Log("4g_setBlackRedirection@@ipIndex:%d, arfcn:%d",ipIndex, arfcn);
+		if(sendMsg(ipIndex, buff,lenth-1)>0){
+			Log("4g_setBlackRedirection@@ipIndex:%d,%s",ipIndex,buff);
+		}
 	}
+	delete docXml;
+	docXml = NULL;
+	delete[] buff;
+	strXML.ReleaseBuffer();
+}
+
+DllExport void e_setWhiteRedirection(int ipIndex,int arfcn){
+	TiXmlDocument *docXml = new TiXmlDocument();
+	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "UTF-8", "");
+	docXml->LinkEndChild(decl);
+
+	TiXmlElement *rootElement = new TiXmlElement("message_content");
+	docXml->LinkEndChild(rootElement);
+	
+//======================================
+	TiXmlElement *redirection_reqElement = new TiXmlElement("set_redirection_req");
+    rootElement->LinkEndChild(redirection_reqElement);
+	
+	TiXmlElement *categoryElement = new TiXmlElement("category");
+    redirection_reqElement->LinkEndChild(categoryElement);
+	TiXmlText *categoryContent = new TiXmlText(itoa(0));
+	categoryElement->LinkEndChild(categoryContent);
+
+	TiXmlElement *priorityElement = new TiXmlElement("priority");
+    redirection_reqElement->LinkEndChild(priorityElement);
+	TiXmlText *priorityContent = new TiXmlText(itoa(5));
+	priorityElement->LinkEndChild(priorityContent);
+
+	TiXmlElement *GeranRedirectElement = new TiXmlElement("GeranRedirect");
+    redirection_reqElement->LinkEndChild(GeranRedirectElement);	
+	TiXmlText *GeranRedirectContent = new TiXmlText(itoa(0));
+	GeranRedirectElement->LinkEndChild(GeranRedirectContent);
+	
+	TiXmlElement *arfcnElement = new TiXmlElement("arfcn");
+    redirection_reqElement->LinkEndChild(arfcnElement);
+	TiXmlText *arfcnContent = new TiXmlText(itoa(0));
+	arfcnElement->LinkEndChild(arfcnContent);
+	
+	TiXmlElement *UtranRedirectElement = new TiXmlElement("UtranRedirect");
+    redirection_reqElement->LinkEndChild(UtranRedirectElement);
+	TiXmlText *UtranRedirectContent = new TiXmlText(itoa(0));
+	UtranRedirectElement->LinkEndChild(UtranRedirectContent);
+	
+	TiXmlElement *uarfcnTacElement = new TiXmlElement("uarfcn");
+    redirection_reqElement->LinkEndChild(uarfcnTacElement);
+	TiXmlText *uarfcnTacContent = new TiXmlText(itoa(0));
+	uarfcnTacElement->LinkEndChild(uarfcnTacContent);
+	
+	TiXmlElement *EutranRedirectElement = new TiXmlElement("EutranRedirect");
+    redirection_reqElement->LinkEndChild(EutranRedirectElement);
+	TiXmlText *EutranRedirectContent = new TiXmlText(itoa(0));
+	EutranRedirectElement->LinkEndChild(EutranRedirectContent);
+	
+	TiXmlElement *earfcnElement = new TiXmlElement("earfcn");
+    redirection_reqElement->LinkEndChild(earfcnElement);
+	TiXmlText *earfcnContent = new TiXmlText(itoa(0));
+	earfcnElement->LinkEndChild(earfcnContent);
+
+	TiXmlElement *RejectMethodElement = new TiXmlElement("RejectMethod");
+    redirection_reqElement->LinkEndChild(RejectMethodElement);
+	TiXmlText *RejectMethodContent = new TiXmlText(itoa(1));
+	RejectMethodElement->LinkEndChild(RejectMethodContent);
+
+//======================================
+	TiXmlElement *redirection_reqElement2 = new TiXmlElement("set_redirection_req");
+    rootElement->LinkEndChild(redirection_reqElement2);
+	
+	TiXmlElement *categoryElement2 = new TiXmlElement("category");
+    redirection_reqElement2->LinkEndChild(categoryElement2);
+	TiXmlText *categoryContent2 = new TiXmlText(itoa(1));
+	categoryElement2->LinkEndChild(categoryContent2);
+
+	TiXmlElement *priorityElement2 = new TiXmlElement("priority");
+    redirection_reqElement2->LinkEndChild(priorityElement2);
+	TiXmlText *priorityContent2 = new TiXmlText(itoa(5));
+	priorityElement2->LinkEndChild(priorityContent2);
+
+	TiXmlElement *GeranRedirectElement2 = new TiXmlElement("GeranRedirect");
+    redirection_reqElement2->LinkEndChild(GeranRedirectElement2);	
+	TiXmlText *GeranRedirectContent2 = new TiXmlText(itoa(0));
+	GeranRedirectElement2->LinkEndChild(GeranRedirectContent2);
+	
+	TiXmlElement *arfcnElement2 = new TiXmlElement("arfcn");
+    redirection_reqElement2->LinkEndChild(arfcnElement2);
+	TiXmlText *arfcnContent2 = new TiXmlText(itoa(0));
+	arfcnElement2->LinkEndChild(arfcnContent2);
+	
+	TiXmlElement *UtranRedirectElement2 = new TiXmlElement("UtranRedirect");
+    redirection_reqElement2->LinkEndChild(UtranRedirectElement2);
+	TiXmlText *UtranRedirectContent2 = new TiXmlText(itoa(0));
+	UtranRedirectElement2->LinkEndChild(UtranRedirectContent2);
+	
+	TiXmlElement *uarfcnTacElement2 = new TiXmlElement("uarfcn");
+    redirection_reqElement2->LinkEndChild(uarfcnTacElement2);
+	TiXmlText *uarfcnTacContent2 = new TiXmlText(itoa(0));
+	uarfcnTacElement2->LinkEndChild(uarfcnTacContent2);
+	
+	TiXmlElement *EutranRedirectElement2 = new TiXmlElement("EutranRedirect");
+    redirection_reqElement2->LinkEndChild(EutranRedirectElement2);
+	TiXmlText *EutranRedirectContent2 = new TiXmlText(itoa(0));
+	EutranRedirectElement2->LinkEndChild(EutranRedirectContent2);
+	
+	TiXmlElement *earfcnElement2 = new TiXmlElement("earfcn");
+    redirection_reqElement2->LinkEndChild(earfcnElement2);
+	TiXmlText *earfcnContent2 = new TiXmlText(itoa(0));
+	earfcnElement2->LinkEndChild(earfcnContent2);
+
+	TiXmlElement *RejectMethodElement2 = new TiXmlElement("RejectMethod");
+    redirection_reqElement2->LinkEndChild(RejectMethodElement2);
+	TiXmlText *RejectMethodContent2 = new TiXmlText(itoa(1));
+	RejectMethodElement2->LinkEndChild(RejectMethodContent2);
+
+//=====================================
+	TiXmlElement *redirection_reqElement3 = new TiXmlElement("set_redirection_req");
+    rootElement->LinkEndChild(redirection_reqElement3);
+	
+	TiXmlElement *categoryElement3 = new TiXmlElement("category");
+    redirection_reqElement3->LinkEndChild(categoryElement3);
+	TiXmlText *categoryContent3 = new TiXmlText(itoa(2));
+	categoryElement3->LinkEndChild(categoryContent3);
+
+	TiXmlElement *priorityElement3 = new TiXmlElement("priority");
+    redirection_reqElement3->LinkEndChild(priorityElement3);
+	TiXmlText *priorityContent3 = new TiXmlText(itoa(2));
+	priorityElement3->LinkEndChild(priorityContent3);
+
+	TiXmlElement *GeranRedirectElement3 = new TiXmlElement("GeranRedirect");
+    redirection_reqElement3->LinkEndChild(GeranRedirectElement3);	
+	TiXmlText *GeranRedirectContent3 = new TiXmlText(itoa(0));
+	GeranRedirectElement3->LinkEndChild(GeranRedirectContent3);
+	
+	TiXmlElement *arfcnElement3 = new TiXmlElement("arfcn");
+    redirection_reqElement3->LinkEndChild(arfcnElement3);
+	TiXmlText *arfcnContent3 = new TiXmlText(itoa(arfcn));
+	arfcnElement3->LinkEndChild(arfcnContent3);
+	
+	TiXmlElement *UtranRedirectElement3 = new TiXmlElement("UtranRedirect");
+    redirection_reqElement3->LinkEndChild(UtranRedirectElement3);
+	TiXmlText *UtranRedirectContent3 = new TiXmlText(itoa(0));
+	UtranRedirectElement3->LinkEndChild(UtranRedirectContent3);
+	
+	TiXmlElement *uarfcnTacElement3 = new TiXmlElement("uarfcn");
+    redirection_reqElement3->LinkEndChild(uarfcnTacElement3);
+	TiXmlText *uarfcnTacContent3 = new TiXmlText(itoa(0));
+	uarfcnTacElement3->LinkEndChild(uarfcnTacContent3);
+	
+	TiXmlElement *EutranRedirectElement3 = new TiXmlElement("EutranRedirect");
+    redirection_reqElement3->LinkEndChild(EutranRedirectElement3);
+	TiXmlText *EutranRedirectContent3 = new TiXmlText(itoa(0));
+	EutranRedirectElement3->LinkEndChild(EutranRedirectContent3);
+	
+	TiXmlElement *earfcnElement3 = new TiXmlElement("earfcn");
+    redirection_reqElement3->LinkEndChild(earfcnElement3);
+	TiXmlText *earfcnContent3 = new TiXmlText(itoa(0));
+	earfcnElement3->LinkEndChild(earfcnContent3);
+
+	TiXmlElement *RejectMethodElement3 = new TiXmlElement("RejectMethod");
+    redirection_reqElement3->LinkEndChild(RejectMethodElement3);
+	TiXmlText *RejectMethodContent3 = new TiXmlText(itoa(1));
+	RejectMethodElement3->LinkEndChild(RejectMethodContent3);
+	
+//==============================
+
+
+	TiXmlPrinter *printer = new TiXmlPrinter();
+	rootElement->Accept(printer );//保存该节点及其子节点到字符串
+	CString strXML = printer->CStr();
+	
+	char *buff;
+	int lenth=0;
+#ifdef _UNICODE 
+	lenth = WideCharToMultiByte(CP_ACP, 0, strXML, strXML.GetLength(), NULL, 0, NULL, NULL);
+	buff = new char[lenth+1];
+    memset(buff,0,lenth + 1);
+	WideCharToMultiByte(CP_ACP,0,strXML,strXML.GetLength(),buff,lenth,NULL,NULL);
+	buff[lenth+1]='\0';
+#else
+	//lenth=strXML.GetAllocLength();
+	lenth=strXML.GetLength();
+	buff = new char [lenth+1];
+	sprintf(buff,_T("%s"),strXML); 
+
+	buff[lenth]='\0';
+#endif
+	Log("4g_setWhiteRedirection@@ipIndex:%d,%s",buff);
+	Log("4g_setWhiteRedirection@@ipIndex:%d, arfcn:%d",ipIndex, arfcn);
+	
+	if (udpConnectFlag){
+		if(sendMsg(ipIndex, buff,lenth-1)>0){
+			Log("4g_setBlackRedirection@@ipIndex:%d,%s",ipIndex,buff);
+		}
+	}
+	
 	delete docXml;
 	docXml = NULL;
 	delete[] buff;
@@ -846,7 +1441,7 @@ DllExport void e_activeCell(int ipIndex,int active_mode, int mode){
 	buff[lenth]='\0';
 #endif
 
-	Log("activeCell@@ipIndex:%d, active_mode:%d,mode:%d",ipIndex, active_mode,mode);
+	Log("4g_activeCell@@ipIndex:%d, active_mode:%d,mode:%d",ipIndex, active_mode,mode);
 	if (udpConnectFlag){
 		sendMsg(ipIndex, buff,lenth-1);
 	}
@@ -908,7 +1503,7 @@ DllExport void e_addWhiteImsi(int ipIndex, char* whiteImsi){
 	buff[lenth]='\0';
 #endif
 
-	Log("addWhiteImsi@@ipIndex:%d, whiteImsi:%s",ipIndex, whiteImsi);
+	Log("4g_addWhiteImsi@@ipIndex:%d, whiteImsi:%s",ipIndex, whiteImsi);
 	if (udpConnectFlag){
 		sendMsg(ipIndex, buff,lenth-1);
 	}
@@ -982,7 +1577,7 @@ DllExport void e_addBlackImsi(int ipIndex,char* blackImsi){
 	buff[lenth]='\0';
 #endif
 
-	Log("addBlackImsi@@ipIndex:%d, blackImsi:%s",ipIndex, blackImsi);
+	Log("4g_addBlackImsi@@ipIndex:%d, blackImsi:%s",ipIndex, blackImsi);
 	if (udpConnectFlag){
 		sendMsg(ipIndex, buff,lenth-1);
 	}
@@ -1053,7 +1648,7 @@ DllExport void e_deleteWhiteImsi(int ipIndex,char* whiteImsi, int n){
 	buff[lenth]='\0';
 #endif
 
-	Log("deleteWhiteImsi@@ipIndex:%d, num:%d,whiteImsi:%s",ipIndex, n,whiteImsi);
+	Log("4g_deleteWhiteImsi@@ipIndex:%d, num:%d,whiteImsi:%s",ipIndex, n,whiteImsi);
 	if (udpConnectFlag){
 		sendMsg(ipIndex, buff,lenth-1);
 	}
@@ -1125,7 +1720,7 @@ DllExport void e_deleteBlackImsi(int ipIndex,char* blackImsi,int n){
 	buff[lenth]='\0';
 #endif
 
-	Log("deleteBlackImsi@@ipIndex:%d, num:%d,blackImsi:%s",ipIndex, n,blackImsi);
+	Log("4g_deleteBlackImsi@@ipIndex:%d, num:%d,blackImsi:%s",ipIndex, n,blackImsi);
 	if (udpConnectFlag){
 		sendMsg(ipIndex, buff,lenth-1);
 	}
@@ -1177,7 +1772,7 @@ DllExport void e_imsiListCheck(int ipIndex){
 	buff[lenth]='\0';
 #endif
 	
-	Log("imsiListCheck@@ipIndex:%d",ipIndex);
+	Log("4g_imsiListCheck@@ipIndex:%d",ipIndex);
 	if (udpConnectFlag){
 		sendMsg(ipIndex,buff,lenth-1);
 	}

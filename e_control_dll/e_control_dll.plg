@@ -6,7 +6,7 @@
 --------------------Configuration: e_control_dll - Win32 Release--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\Users\chw\AppData\Local\Temp\RSP68AC.tmp" with contents
+Creating temporary file "C:\Users\chw\AppData\Local\Temp\RSP674.tmp" with contents
 [
 /nologo /subsystem:windows /dll /incremental:no /pdb:"Release/e_control_dll.pdb" /machine:I386 /def:".\e_control_dll.def" /out:"Release/e_control_dll.dll" /implib:"Release/e_control_dll.lib" 
 .\Release\e_control_dll.obj
@@ -18,7 +18,7 @@ Creating temporary file "C:\Users\chw\AppData\Local\Temp\RSP68AC.tmp" with conte
 .\Release\tinyxmlparser.obj
 .\Release\e_control_dll.res
 ]
-Creating command line "link.exe @C:\Users\chw\AppData\Local\Temp\RSP68AC.tmp"
+Creating command line "link.exe @C:\Users\chw\AppData\Local\Temp\RSP674.tmp"
 <h3>Output Window</h3>
 Linking...
    Creating library Release/e_control_dll.lib and object Release/e_control_dll.exp

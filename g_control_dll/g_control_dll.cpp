@@ -308,7 +308,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			imsiInfo.msgType=CHECKBLACKIMSI;
 			memset(imsiInfo.imsi,0,15);
 			memcpy(imsiInfo.imsi,checkImsiInfo->msgInfo.data,15);
-			//imsiInfo.imsi[15]='\0';
+			imsiInfo.imsi[15]='\0';
 			Log("checkBlackImsi Ok & ipIndex:%d,carNum:%d,imsi:%s",imsiInfo.ipIndex,imsiInfo.carrierIndex,imsiInfo.imsi);
 			(*pImsiCheckFun)(&imsiInfo);
 		}else if(pMsgHeader->msgSerialNum==CHECKWHITEIMSI){	//checkWhite
@@ -319,7 +319,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			imsiInfo.msgType=CHECKWHITEIMSI;
 			memset(imsiInfo.imsi,0,15);
 			memcpy(imsiInfo.imsi,checkImsiInfo->msgInfo.data,15);
-			//imsiInfo.imsi[15]='\0';
+			imsiInfo.imsi[15]='\0';
 			Log("checkWhiteImsi Ok & ipIndex:%d,carNum:%d,imsi:%s",imsiInfo.ipIndex,imsiInfo.carrierIndex,imsiInfo.imsi);
 
 			(*pImsiCheckFun)(&imsiInfo);				
@@ -366,15 +366,17 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 		if(len!=sizeof(GetImsiReport)){
 			return ;
 		}
+
 		GetImsiReport *imsiInfo=(GetImsiReport*)p_buff;
 		ImsiReportInfo reportInfo;
 		reportInfo.ipIndex=ipIndex;
 		reportInfo.carrierIndex=imsiInfo->header.msgCarrier;
 		memset(reportInfo.imsi,0, 15 );
 		memcpy(reportInfo.imsi, imsiInfo->data2.data,15);
-
+		//reportInfo.imsi[15]='\0';
 		memset(reportInfo.imei,0, 15 );
 		memcpy(reportInfo.imei, imsiInfo->data3.data,15);
+		//reportInfo.imei[15]='\0';
 		Log("getImsiReport & ipIndex:%d,carNum:%d,imsi:%s,imei:%s",ipIndex,reportInfo.carrierIndex,reportInfo.imsi,reportInfo.imei);
 		(*pImsiReportFun)(&reportInfo);
 	}
@@ -439,6 +441,7 @@ DllExport void g_carrFrePointCheck(int ipIndex,U8 carrierIndicat){
 	char buff[sizeof(CarrFrePointCheck)+1];
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&carrCheckInfo,sizeof(CarrFrePointCheck));
+	buff[sizeof(CarrFrePointCheck)]='\0';
 	Log("g_carrFrePointCheck&&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
 	sendMsg(ipIndex, buff, sizeof(CarrFrePointCheck));
@@ -598,6 +601,7 @@ DllExport void g_restartCard(int ipIndex,U8 carrierIndicat){
 	char buff[sizeof(MsgHeader)+1];
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&headerInfo,sizeof(MsgHeader));
+	buff[sizeof(MsgHeader)]='\0';	
 	Log("g_restartCard&&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 	sendMsg(ipIndex, buff, sizeof(MsgHeader));
 }
@@ -623,6 +627,7 @@ DllExport void g_addBlackImsi(int ipIndex,U8 carrierIndicat,char* imsi){
 	char buff[sizeof(DataInfo_35)+1];
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&addImsiInfo,sizeof(DataInfo_35));
+	buff[sizeof(DataInfo_35)]='\0';	
 	Log("g_addBlackImsi&&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
 	sendMsg(ipIndex, buff, sizeof(DataInfo_35));
 }
@@ -648,6 +653,7 @@ DllExport void g_addWhiteImsi(int ipIndex,U8 carrierIndicat,char* imsi){
 	char buff[sizeof(DataInfo_35)+1];
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&addImsiInfo,sizeof(DataInfo_35));
+	buff[sizeof(DataInfo_35)]='\0';	
 	Log("g_addWhiteImsi&&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
 	sendMsg(ipIndex, buff, sizeof(DataInfo_35));
 }
@@ -666,6 +672,7 @@ DllExport void g_checkBlackImsi(int ipIndex,U8 carrierIndicat){
 	char buff[sizeof(DataInfo_0)+1];
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&checkImsiInfo,sizeof(DataInfo_0));	
+	buff[sizeof(DataInfo_0)]='\0';	
 	Log("g_checkBlackImsi&&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
 	sendMsg(ipIndex, buff, sizeof(DataInfo_0));
@@ -684,7 +691,8 @@ DllExport void g_checkWhiteImsi(int ipIndex,U8 carrierIndicat){
 	
 	char buff[sizeof(DataInfo_0)+1];
 	memset(buff,0,sizeof(buff));
-	memcpy(buff,&checkImsiInfo,sizeof(DataInfo_0));	
+	memcpy(buff,&checkImsiInfo,sizeof(DataInfo_0));
+	buff[sizeof(DataInfo_0)]='\0';		
 	Log("g_checkWhiteImsi&&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
 	sendMsg(ipIndex, buff, sizeof(DataInfo_0));
@@ -711,6 +719,7 @@ DllExport void g_deleteBlackImsi(int ipIndex,U8 carrierIndicat,char* imsi){
 	char buff[sizeof(DataInfo_35)+1];
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&deleteImsiInfo,sizeof(DataInfo_35));
+	buff[sizeof(DataInfo_35)]='\0';	
 	Log("g_deleteBlackImsi&&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
 
 	sendMsg(ipIndex, buff, sizeof(DataInfo_35));
@@ -737,6 +746,7 @@ DllExport void g_deleteWhiteImsi(int ipIndex,U8 carrierIndicat,char* imsi){
 	char buff[sizeof(DataInfo_35)+1];
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&deleteImsiInfo,sizeof(DataInfo_35));
+	buff[sizeof(DataInfo_35)]='\0';	
 	Log("g_deleteWhiteImsi&&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
 
 	sendMsg(ipIndex, buff, sizeof(DataInfo_35));
@@ -755,7 +765,8 @@ DllExport void g_clearBlackImsiList(int ipIndex,U8 carrierIndicat){
 	
 	char buff[sizeof(DataInfo_0)+1];
 	memset(buff,0,sizeof(buff));
-	memcpy(buff,&clearImsiInfo,sizeof(DataInfo_0));	
+	memcpy(buff,&clearImsiInfo,sizeof(DataInfo_0));
+	buff[sizeof(DataInfo_0)]='\0';	
 	Log("g_clearBlackImsiList&&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
 	sendMsg(ipIndex, buff, sizeof(DataInfo_0));
@@ -775,6 +786,7 @@ DllExport void g_clearWhiteImsiList(int ipIndex,U8 carrierIndicat){
 	char buff[sizeof(DataInfo_0)+1];
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&clearImsiInfo,sizeof(DataInfo_0));
+	buff[sizeof(DataInfo_0)]='\0';
 	Log("g_clearWhiteImsiList&&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
 	sendMsg(ipIndex, buff, sizeof(DataInfo_0));

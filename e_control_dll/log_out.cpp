@@ -15,8 +15,8 @@
 #include <time.h>
 #include <sys/timeb.h>
 #include <stdarg.h>
-char logfilename1[]="MyLog1.log";
-char logfilename2[]="MyLog2.log";
+char logfilename1[]="e_MyLog1.log";
+char logfilename2[]="e_MyLog2.log";
 char logstr[16000];
 char datestr[16];
 char timestr[16];

@@ -40,7 +40,7 @@ typedef struct imsiCheckInfo
 	int ipIndex; 		
 	U8 carrierIndex;	
 	char msgType;
-	char imsi[15];
+	char imsi[16];
 } ImsiCheckInfo;
 
 

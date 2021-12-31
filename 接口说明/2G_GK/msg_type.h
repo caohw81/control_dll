@@ -40,7 +40,7 @@ typedef struct imsiCheckInfo
 	int ipIndex; 		
 	U8 carrierIndex;	
 	char msgType;
-	char imsi[15];
+	char imsi[16];
 } ImsiCheckInfo;
 
 
@@ -48,8 +48,8 @@ typedef struct imsiReportInfo
 {
 	int ipIndex; 		//ip±êºÅ
 	U8 carrierIndex;	//0:ÔØ²¨Ò»;1:ÔØ²¨¶þ
-	char imsi[15];
-	char imei[15];
+	char imsi[16];
+	char imei[16];
 }ImsiReportInfo;
 
 

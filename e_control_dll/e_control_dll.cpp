@@ -17,17 +17,17 @@ typedef struct imsiReportInfo
 {
 	int ipIndex;
 	int userType;
-	char imsi[15];
-	char imei[15];
+	char imsi[16];
+	char imei[16];
 	int rsrp;
 } E_IMSIReportInfo;
 
 typedef struct cellConfigInfo
 {
-	int euarfcn;
-	int mcc;
+	int euarfcn; 
+	int mcc; 
 	char mnc[5];
-	int pci;
+	int pci; 
 	int tac;
 	int periodTac;
 	char cellid[15];
@@ -39,7 +39,7 @@ typedef struct cellConfigInfo
 
 SOCKET  mserver;
 sockaddr_in m_atrget_addr;
-char recvBuf[1024]={0};
+char recvBuf[2048]={0};
 int udpConnectFlag=1;
 
 int m_send_Port=51888;
@@ -51,8 +51,8 @@ typedef int (*PIMSIREPORTCALLBACKFUN)(E_IMSIReportInfo* p_IMSIReportInfo);
 typedef int ( *PSTATECALLBACKFUN)(int ipIndex, int id,int param);
 typedef int ( *PWHITEIMSICHECKCALLBACKFUN)(int ipIndex, char* imsiList,int rows);
 typedef int ( *PBLACKIMSICHECKCALLBACKFUN)(int ipIndex, char* imsiList,int rows);
-typedef int ( *PFEMTOSTATUSCALLBACKFUN)(int ipIndex, int status, CellConfigInfo* cellInfo);
-
+//typedef int ( *PFEMTOSTATUSCALLBACKFUN)(int ipIndex, int status, CellConfigInfo* cellInfo);
+typedef int ( *PFEMTOSTATUSCALLBACKFUN)(int ipIndex, int status, int earfcn,int mcc,char* mnc, int pci, int periodTac,int txpower);
 
 PIMSIREPORTCALLBACKFUN pIMSIReportFun=0;
 PSTATECALLBACKFUN	pStatusFun = 0;
@@ -315,17 +315,13 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
     if (pRootElement){
 		TiXmlElement* p_secLeaf = pRootElement->FirstChildElement();
         string secLeaf_str=p_secLeaf->Value();
-		CString str(secLeaf_str.c_str());
-		str.Format("RECV:%s",secLeaf_str);
-		//AfxMessageBox(str);
+		Log("4g_msg_recv@@ipIndex:%d, msg:%s",ipIndex,secLeaf_str.c_str());
 		if(secLeaf_str=="status_response"){			//%%心跳 
 		    TiXmlElement* p_status = p_secLeaf->FirstChildElement("status");
-			const char *status_char = p_status->GetText();  //判断是否为空:if(status)
+			const char *status_char = p_status->GetText();  //判断是否为空:if(status)						
 			if(status_char){
-				const char *status_char2=status_char+2;
-				unsigned char status_char_convert[1];
-				stringToHex(status_char2,status_char_convert);
-				int m_status=status_char_convert[0];
+				int m_status=atoi(status_char);
+				
 				//printf("heartbeat status:%d\n",m_status);
 				//AfxMessageBox("0");
 				Log("4g_status_response@@ipIndex:%d, m_status:%d",ipIndex,m_status);
@@ -333,81 +329,98 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			}
 		}
 		else if(secLeaf_str=="femto_status_response"){			
-			CellConfigInfo cellInfo;
 			TiXmlElement* p_status = p_secLeaf->FirstChildElement("status");
-			const char *status_char = p_status->GetText();
+			const char *status_char = p_status->GetText();			
 			int m_status=atoi(status_char);
-					
+			
 			TiXmlElement* p_euarfcn = p_secLeaf->FirstChildElement("euarfcn");
 			const char *p_euarfcn_char = p_euarfcn->GetText();
-			cellInfo.euarfcn = atoi(p_euarfcn_char);
+			int m_euarfcn = atoi(p_euarfcn_char);		
 
 			TiXmlElement* p_mcc = p_secLeaf->FirstChildElement("mcc");
-			const char *mcc_char = p_mcc->GetText();
-			cellInfo.mcc=atoi(mcc_char);
+			const char *mcc_char = p_mcc->GetText();	
+			int m_mcc=atoi(mcc_char);
 			
 			TiXmlElement* p_mnc = p_secLeaf->FirstChildElement("mnc");
 			const char *mnc_char = p_mnc->GetText();
-			memset(cellInfo.mnc,0,sizeof(cellInfo.mnc));
-			memcpy(cellInfo.mnc,mnc_char,strlen(mnc_char));
-			//strcpy(cellInfo.mnc,mnc_char);
+			char* m_mnc_char=(char* )malloc(strlen(mnc_char)*sizeof(char)+1);
+			memset(m_mnc_char,0,strlen(mnc_char)+1);
+			memcpy(m_mnc_char,mnc_char,strlen(mnc_char));
+			m_mnc_char[strlen(mnc_char)]='\0';
 			
 			TiXmlElement* p_pci = p_secLeaf->FirstChildElement("pci");
 			const char *pci_char = p_pci->GetText();
-			cellInfo.pci=atoi(pci_char);
-			
+			int m_pci=atoi(pci_char);
+
 			TiXmlElement* p_tac = p_secLeaf->FirstChildElement("tac");
 			const char *tac_char = p_tac->GetText();
-			cellInfo.tac=atoi(tac_char);
-			
+			int m_tac=atoi(tac_char);
+		
 			TiXmlElement* p_periodTac = p_secLeaf->FirstChildElement("periodTac");
 			const char *periodTac_char = p_periodTac->GetText();
-			cellInfo.periodTac=atoi(periodTac_char);
-			
+			int m_periodTac=atoi(periodTac_char);
+
+/*			
 			TiXmlElement* p_cellid = p_secLeaf->FirstChildElement("cellid");
 			const char *cellid_char = p_cellid->GetText();
 			memset(cellInfo.cellid,0,sizeof(cellInfo.cellid));
 			memcpy(cellInfo.cellid,cellid_char,strlen(cellid_char));
 			//strcpy(cellInfo.cellid,cellid_char);		
-			
+*/			
 			TiXmlElement* p_txpower = p_secLeaf->FirstChildElement("txpower");
 			const char *txpower_char = p_txpower->GetText();
-			cellInfo.txpower=atoi(txpower_char);	
+			int m_txpower=atoi(txpower_char);
 			
 			TiXmlElement* p_maxTxPower = p_secLeaf->FirstChildElement("maxTxPower");
 			const char *maxTxPower_char = p_maxTxPower->GetText();
-			cellInfo.maxTxPower=atoi(maxTxPower_char);	
+			int m_maxTxPower=atoi(maxTxPower_char);	
 	
-			Log("4g_femto_status@@ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d",ipIndex, cellInfo.euarfcn,cellInfo.mcc,cellInfo.mnc,cellInfo.pci);
-			(*pCellStatusResponseFun)(ipIndex, m_status, &cellInfo);
+			Log("4g_femto_status@@ipIndex:%d,status:%d,euarfcn:%d,mcc:%d,mnc:%s,pci:%d,periodTac:%d,txpower:%d,maxTxPower:%d,tac:%d",ipIndex,m_status, m_euarfcn,m_mcc,m_mnc_char,m_pci,m_periodTac,m_txpower,m_maxTxPower,m_tac);
+			//(*pCellStatusResponseFun)(ipIndex, m_status, &cellInfo);
+			(*pCellStatusResponseFun)(ipIndex, m_status, m_euarfcn,m_mcc, m_mnc_char, m_pci,m_periodTac,m_txpower);
+			free(m_mnc_char);
 		}
 		else if(secLeaf_str=="set_configuration_result"){	//%%小区设置
 			TiXmlElement* p_result = p_secLeaf->FirstChildElement("result");
 			const char *result_char = p_result->GetText();
+			
+			TiXmlElement* p_rebootflag= p_secLeaf->FirstChildElement("rebootflag");
+			const char *rebootflag_char = p_rebootflag->GetText(); 		
+			
 			if(result_char){
 				int m_result=atoi(result_char);
+				int m_rebootflag=atoi(rebootflag_char);
 				//printf("set_configuration_result status:%d\n",m_status);
 				//CString str;
 				//str.Format("config status:%d",m_status);
 				//AfxMessageBox(str);
-				Log("4g_set_configuration_result@@ipIndex:%d,m_result:%d",ipIndex, m_result);
+				Log("4g_set_configuration_result@@ipIndex:%d,m_result:%d,m_rebootflag:%d",ipIndex, m_result,m_rebootflag);
 				(*pStatusFun)(ipIndex, 1,m_result); 				
 			}
 		}
 		else if(secLeaf_str=="set_redirection_rsp"){		//%%置用户策略重定向
 			TiXmlElement* p_result = p_secLeaf->FirstChildElement("result");
 			const char *result_char = p_result->GetText(); 
+			
+			TiXmlElement* p_rebootflag= p_secLeaf->FirstChildElement("rebootflag");
+			const char *rebootflag_char = p_rebootflag->GetText(); 
+			
 			int m_result=atoi(result_char);
+			int m_rebootflag=atoi(rebootflag_char);
 			//printf("set_redirection_rsp result:%d\n",m_result);
-			Log("4g_set_redirection_rsp@@ipIndex:%d,m_result:%d",ipIndex,m_result);
+			Log("4g_set_redirection_rsp@@ipIndex:%d,m_result:%d,m_rebootflag:%d",ipIndex,m_result,m_rebootflag);
 			(*pStatusFun)(ipIndex, 2,m_result); 
 		}
 		else if(secLeaf_str=="activate_nodeb_result"){		//%%激活小区
 			TiXmlElement *p_result = p_secLeaf->FirstChildElement("result");
 			const char *result_char = p_result->GetText();
+			TiXmlElement* p_rebootflag= p_secLeaf->FirstChildElement("rebootflag");
+			const char *rebootflag_char = p_rebootflag->GetText();
+			
 			int m_result=atoi(result_char);
+			int m_rebootflag=atoi(rebootflag_char);
 			//printf("activate_nodeb_result result:%d\n",m_result);
-			Log("4g_activate_nodeb_result@@ipIndex:%d, m_result:%d",ipIndex, m_result);
+			Log("4g_activate_nodeb_result@@ipIndex:%d, m_result:%d,m_rebootflag:%d",ipIndex, m_result,m_rebootflag);
 			(*pStatusFun)(ipIndex, 3,m_result); 
 		}
 		else if(secLeaf_str=="imsi_list_config_result"){	//%%黑白名单添加
@@ -432,12 +445,13 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 					}
 					int imsiNum=whiteVec.size();
 					if(imsiNum>0){
-						char* whiteImsiList=(char* )malloc(imsiNum*15*sizeof(char));
+						char* whiteImsiList=(char* )malloc(imsiNum*15*sizeof(char)+1);
 						memset(whiteImsiList,0,imsiNum*15);
 						for(int i=0;i<imsiNum;++i){
 							memcpy(&whiteImsiList[i*15],whiteVec[i].c_str(),15);
 							//whiteImsiList[i][15]='\0';
 						}
+						whiteImsiList[imsiNum*15*sizeof(char)]='\0';
 						Log("4g_imsi_list_check_result@@ipIndex:%d, white imsi Num:%d",ipIndex, imsiNum);
 						(*pWhiteImsiCheckFun)(ipIndex, whiteImsiList,imsiNum );
 						free(whiteImsiList);
@@ -461,13 +475,13 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 					}
 					int imsiNum=blackVec.size();
 					if(imsiNum>0){					
-						char* blackImsiList=(char* )malloc(imsiNum*15*sizeof(char));
+						char* blackImsiList=(char* )malloc(imsiNum*15*sizeof(char)+1);
 						memset(blackImsiList,0,imsiNum*15);
 						for(int i=0;i<imsiNum;++i){
 							memcpy(&blackImsiList[i*15],blackVec[i].c_str(),15);
 						}
 						Log("4g_imsi_list_check_result@@ipIndex:%d, black imsi Num:%d",ipIndex, imsiNum);
-
+						blackImsiList[imsiNum*15*sizeof(char)]='\0';
 						(*pBlackImsiCheckFun)(ipIndex, blackImsiList,imsiNum );						
 						free(blackImsiList);
 					}				
@@ -488,34 +502,49 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			(*pStatusFun)(ipIndex, 5,m_result); 			
 		}
 		else if(secLeaf_str=="scanner"){					//%%捕号IMSI上报
+			E_IMSIReportInfo imsiInfo;
+			imsiInfo.ipIndex=ipIndex;
+			
 			TiXmlElement* p_userType = p_secLeaf->FirstChildElement("userType");
 			const char *userType_char = p_userType->GetText();
-			int m_userType=atoi(userType_char);			
+			int m_userType=atoi(userType_char);	
+			imsiInfo.userType=m_userType;			
+			
 			
 			TiXmlElement* p_imsi = p_secLeaf->FirstChildElement("imsi");
-			const char *imsi_char = p_imsi->GetText();
-
+			
+			if(p_imsi){
+				const char *imsi_char = p_imsi->GetText();
+				memset(imsiInfo.imsi,0,sizeof(imsiInfo.imsi));
+				memcpy(imsiInfo.imsi,imsi_char,15);
+				imsiInfo.imsi[15]='\0';
+			}else{
+				memset(imsiInfo.imsi,0,sizeof(imsiInfo.imsi));
+				for(int i=0;i<15;++i){
+					imsiInfo.imsi[i]='0';
+				}
+				imsiInfo.imsi[15]='\0';
+			}		
+			
 			TiXmlElement* p_imei = p_secLeaf->FirstChildElement("imei");
-			const char *imei_char = p_imei->GetText();
+			if(p_imei){
+				const char *imei_char = p_imei->GetText();
+				memset(imsiInfo.imei,0,sizeof(imsiInfo.imei));
+				memcpy(imsiInfo.imei,imei_char,15);
+				imsiInfo.imei[15]='\0';
+			}else{
+				memset(imsiInfo.imei,0,sizeof(imsiInfo.imei));
+				for(int i=0;i<15;++i){
+					imsiInfo.imei[i]='0';
+				}
+				imsiInfo.imei[15]='\0';
+			}
+			
+			
 			
 			TiXmlElement* p_rsrp = p_secLeaf->FirstChildElement("rsrp");
 			const char *rsrp_char = p_rsrp->GetText();
 			int m_rsrp=atoi(rsrp_char);
-			
-			//printf("scanner userType:%d \t imsi_char:%s \t m_rsrp:%d \n",m_userType,imsi_char,m_rsrp);
-
-			E_IMSIReportInfo imsiInfo;
-			imsiInfo.ipIndex=ipIndex;
-			imsiInfo.userType=m_userType;
-		
-			memset(imsiInfo.imsi,0,sizeof(imsiInfo.imsi));
-			memcpy(imsiInfo.imsi,imsi_char,15);
-			//imsiInfo.imsi[sizeof(imsiInfo.imsi)]='\0';
-			
-			memset(imsiInfo.imei,0,sizeof(imsiInfo.imei));
-			memcpy(imsiInfo.imei,imei_char,15);
-			//imsiInfo.imsi[sizeof(imsiInfo.imsi)]='\0';
-			
 			imsiInfo.rsrp=m_rsrp;
 
 			Log("4g_scanner@@ipIndex:%d, userType:%d,imsi:%s,imei:%s,rsrp:%d",ipIndex, m_userType,imsi_char,imei_char,m_rsrp);
@@ -551,7 +580,6 @@ UINT Main_Socket_Thread(LPVOID pr){
 }
 
 #define DllExport extern "C" __declspec(dllexport) 
-
 
 DllExport void e_initRun(){
 	udpConnectFlag=1;
@@ -605,100 +633,6 @@ DllExport void e_femtoStatusRequest(int ipIndex){
 	strXML.ReleaseBuffer();
 }
 
-/*DllExport void e_setCellConfig(int ipIndex, int euarfcn, int mcc,char* mnc, int pci, int tac, int txpower, int periodTac, int bandwidth, char* cellid){
-	TiXmlDocument *docXml = new TiXmlDocument();
-	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "UTF-8", "");
-	docXml->LinkEndChild(decl);
-
-	TiXmlElement *rootElement = new TiXmlElement("message_content");
-	docXml->LinkEndChild(rootElement);
-
-	TiXmlElement *configurationElement = new TiXmlElement("set_configuration");
-    rootElement->LinkEndChild(configurationElement);
-	
-	TiXmlElement *euarfcnElement = new TiXmlElement("euarfcn");
-    configurationElement->LinkEndChild(euarfcnElement);
-	TiXmlText *euarfcnContent = new TiXmlText(itoa(euarfcn));
-	euarfcnElement->LinkEndChild(euarfcnContent);
-
-	TiXmlElement *mccElement = new TiXmlElement("mcc");
-    configurationElement->LinkEndChild(mccElement);
-	TiXmlText *mccContent = new TiXmlText(itoa(mcc));
-	mccElement->LinkEndChild(mccContent);
-	
-	TiXmlElement *mncElement = new TiXmlElement("mnc");
-    configurationElement->LinkEndChild(mncElement);
-	TiXmlText *mncContent = new TiXmlText(mnc);
-	mncElement->LinkEndChild(mncContent);
-	
-	TiXmlElement *pciElement = new TiXmlElement("pci");
-    configurationElement->LinkEndChild(pciElement);
-	TiXmlText *pciContent = new TiXmlText(itoa(pci));
-	pciElement->LinkEndChild(pciContent);
-
-	TiXmlElement *tacElement = new TiXmlElement("tac");
-    configurationElement->LinkEndChild(tacElement);
-	TiXmlText *tacContent = new TiXmlText(itoa(tac));
-	tacElement->LinkEndChild(tacContent);
-	
-	TiXmlElement *txpowerElement = new TiXmlElement("txpower");
-    configurationElement->LinkEndChild(txpowerElement);
-	TiXmlText *txpowerContent = new TiXmlText(itoa(txpower));
-	txpowerElement->LinkEndChild(txpowerContent);
-	
-	TiXmlElement *periodTacElement = new TiXmlElement("periodTac");
-    configurationElement->LinkEndChild(periodTacElement);
-	TiXmlText *periodTacContent = new TiXmlText(itoa(periodTac));
-	periodTacElement->LinkEndChild(periodTacContent);
-	
-	TiXmlElement *bandwidthElement = new TiXmlElement("bandwidth");
-    configurationElement->LinkEndChild(bandwidthElement);
-	TiXmlText *bandwidthContent = new TiXmlText(itoa(bandwidth));
-	bandwidthElement->LinkEndChild(bandwidthContent);
-	
-	TiXmlElement *cellidElement = new TiXmlElement("cellid");
-    configurationElement->LinkEndChild(cellidElement);
-	TiXmlText *cellidContent = new TiXmlText(cellid);
-	cellidElement->LinkEndChild(cellidContent);
-	
-	TiXmlElement *timeoutElement = new TiXmlElement("timeout");
-    configurationElement->LinkEndChild(timeoutElement);
-
-	TiXmlPrinter *printer = new TiXmlPrinter();
-	rootElement->Accept(printer );//保存该节点及其子节点到字符串
-	CString strXML = printer->CStr();
-	
-	char *buff;
-	int lenth=0;
-#ifdef _UNICODE 
-	lenth = WideCharToMultiByte(CP_ACP, 0, strXML, strXML.GetLength(), NULL, 0, NULL, NULL);
-	buff = new char[lenth+1];
-    memset(buff,0,lenth + 1);
-	WideCharToMultiByte(CP_ACP,0,strXML,strXML.GetLength(),buff,lenth,NULL,NULL);
-	buff[lenth+1]='\0';
-#else
-	//lenth=strXML.GetAllocLength();
-	lenth=strXML.GetLength();
-	buff = new char [lenth+1];
-	sprintf(buff,_T("%s"),strXML); 
-	
-	buff[lenth]='\0';
-#endif
-	
-	if (udpConnectFlag){
-		Log("4g_setCellConfig send begin.");
-		if(sendMsg(ipIndex,buff,lenth-1)>0){
-			Log("4g_setCellConfig@@ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d,tac:%d,periodTac:%d,bandwidth:%d,cellid:%s",ipIndex, euarfcn,mcc,mnc,pci,tac,periodTac,bandwidth,cellid);
-		}
-	}
-	delete docXml;
-	docXml = NULL;
-	delete[] buff;
-	strXML.ReleaseBuffer();
-}
-*/
-
-
 DllExport void e_setCellConfig(int ipIndex, int euarfcn, int mcc,char* mnc, int pci, int tac, int txpower, int periodTac, int bandwidth, char* cellid){
 	TiXmlDocument *docXml = new TiXmlDocument();
 	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "UTF-8", "");
@@ -729,88 +663,67 @@ DllExport void e_setCellConfig(int ipIndex, int euarfcn, int mcc,char* mnc, int 
     configurationElement->LinkEndChild(pciElement);
 	TiXmlText *pciContent = new TiXmlText(itoa(pci));
 	pciElement->LinkEndChild(pciContent);
-
+/*
 	TiXmlElement *tacElement = new TiXmlElement("tac");
     configurationElement->LinkEndChild(tacElement);
 	TiXmlText *tacContent = new TiXmlText(itoa(tac));
 	tacElement->LinkEndChild(tacContent);
-
+*/
+	
+	TiXmlElement *txpowerElement = new TiXmlElement("txpower");
+    configurationElement->LinkEndChild(txpowerElement);
+	TiXmlText *txpowerContent = new TiXmlText(itoa(txpower));
+	txpowerElement->LinkEndChild(txpowerContent);
+	
+	TiXmlElement *periodTacElement = new TiXmlElement("periodTac");
+    configurationElement->LinkEndChild(periodTacElement);
+	TiXmlText *periodTacContent = new TiXmlText(itoa(periodTac));
+	periodTacElement->LinkEndChild(periodTacContent);
+	
+/*	TiXmlElement *bandwidthElement = new TiXmlElement("bandwidth");
+    configurationElement->LinkEndChild(bandwidthElement);
+	TiXmlText *bandwidthContent = new TiXmlText(itoa(bandwidth));
+	bandwidthElement->LinkEndChild(bandwidthContent);
+	
+	TiXmlElement *cellidElement = new TiXmlElement("cellid");
+    configurationElement->LinkEndChild(cellidElement);
+	TiXmlText *cellidContent = new TiXmlText(cellid);
+	cellidElement->LinkEndChild(cellidContent);
+	
+	TiXmlElement *timeoutElement = new TiXmlElement("timeout");
+    configurationElement->LinkEndChild(timeoutElement);
+*/
 	TiXmlPrinter *printer = new TiXmlPrinter();
 	rootElement->Accept(printer );//保存该节点及其子节点到字符串
 	CString strXML = printer->CStr();
 	
 	char *buff;
-	int lenth=strXML.GetLength();
+	int lenth=0;
+#ifdef _UNICODE 
+	lenth = WideCharToMultiByte(CP_ACP, 0, strXML, strXML.GetLength(), NULL, 0, NULL, NULL);
+	buff = new char[lenth+1];
+    memset(buff,0,lenth + 1);
+	WideCharToMultiByte(CP_ACP,0,strXML,strXML.GetLength(),buff,lenth,NULL,NULL);
+	buff[lenth+1]='\0';
+#else
+	//lenth=strXML.GetAllocLength();
+	lenth=strXML.GetLength();
 	buff = new char [lenth+1];
 	sprintf(buff,_T("%s"),strXML); 
 	
 	buff[lenth]='\0';
+#endif
 	
 	if (udpConnectFlag){
 		Log("4g_setCellConfig send begin.");
 		if(sendMsg(ipIndex,buff,lenth-1)>0){
-			Log("4g_setCellConfig@@ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d,tac:%d,periodTac:%d,bandwidth:%d,cellid:%s",ipIndex, euarfcn,mcc,mnc,pci,tac,periodTac,bandwidth,cellid);
+			Log("4g_setCellConfig@@ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d,tac:%d,periodTac:%d",ipIndex, euarfcn,mcc,mnc,pci,tac,periodTac);
 		}
 	}
 	delete docXml;
 	docXml = NULL;
 	delete[] buff;
 	strXML.ReleaseBuffer();
-	
-	Sleep(50);
-//==========================================
-	TiXmlDocument *docXml2 = new TiXmlDocument();
-	TiXmlDeclaration* decl2 = new TiXmlDeclaration("1.0", "UTF-8", "");
-	docXml2->LinkEndChild(decl2);
-
-	TiXmlElement *rootElement2 = new TiXmlElement("message_content");
-	docXml2->LinkEndChild(rootElement2);
-
-	TiXmlElement *configurationElement2 = new TiXmlElement("set_configuration");
-    rootElement2->LinkEndChild(configurationElement2);
-	
-	TiXmlElement *txpowerElement2 = new TiXmlElement("txpower");
-    configurationElement2->LinkEndChild(txpowerElement2);
-	TiXmlText *txpowerContent2 = new TiXmlText(itoa(txpower));
-	txpowerElement2->LinkEndChild(txpowerContent2);
-	
-	TiXmlElement *periodTacElement2 = new TiXmlElement("periodTac");
-    configurationElement2->LinkEndChild(periodTacElement2);
-	TiXmlText *periodTacContent2 = new TiXmlText(itoa(periodTac));
-	periodTacElement2->LinkEndChild(periodTacContent2);
-	
-	TiXmlElement *bandwidthElement2 = new TiXmlElement("bandwidth");
-    configurationElement2->LinkEndChild(bandwidthElement2);
-	TiXmlText *bandwidthContent2 = new TiXmlText(itoa(bandwidth));
-	bandwidthElement2->LinkEndChild(bandwidthContent2);
-	
-	TiXmlElement *cellidElement2 = new TiXmlElement("cellid");
-    configurationElement2->LinkEndChild(cellidElement2);
-	TiXmlText *cellidContent2 = new TiXmlText(cellid);
-	cellidElement2->LinkEndChild(cellidContent2);
-	
-
-	TiXmlPrinter *printer2 = new TiXmlPrinter();
-	rootElement2->Accept(printer2);//保存该节点及其子节点到字符串
-	CString strXML2 = printer2->CStr();
-	
-	char *buff2;
-	int lenth2=strXML2.GetLength();
-	buff2 = new char [lenth2+1];
-	sprintf(buff2,_T("%s"),strXML2); 
-	
-	buff2[lenth2]='\0';
-	
-	if (udpConnectFlag){
-		Log("4g_setCellConfig send begin2.");
-		if(sendMsg(ipIndex,buff2,lenth2-1)>0){
-			Log("4g_setCellConfig2@@ipIndex:%d,txpower:%d, periodTac:%d,bandwidth:%d,cellid:%s",ipIndex,txpower, periodTac,bandwidth,cellid);
-		}
-	}
-	delete docXml2;
-	docXml2 = NULL;
-	delete[] buff2;
-	strXML2.ReleaseBuffer();		
 }
 
 /*DllExport void e_setRedirection(int ipIndex, int category, char* priority,int GeranRedirect, int arfcn, int UtranRedirect, int uarfcn, int EutranRedirect, int earfcn,int RejectMethod){
@@ -1605,7 +1518,7 @@ DllExport void e_deleteWhiteImsi(int ipIndex,char* whiteImsi, int n){
 		for(int i= 0 ;i<n;++i){
 			memset(m_imsi,0,16);
 			memcpy(m_imsi,whiteImsi+i*15,15);
-			//m_imsi[16]='\0';
+			//m_imsi[15]='\0';
 			TiXmlElement *imsiElement = new TiXmlElement("imsi");
 			whiteimsiElement->LinkEndChild(imsiElement);
 			TiXmlText *imsiContent = new TiXmlText((const char*)m_imsi);
@@ -1679,7 +1592,7 @@ DllExport void e_deleteBlackImsi(int ipIndex,char* blackImsi,int n){
 		for(int i= 0 ;i<n;++i){
 			memset(m_imsi,0,16);
 			memcpy(m_imsi,blackImsi+i*15,15);
-			//m_imsi[16]='\0';
+			//m_imsi[15]='\0';
 			TiXmlElement *imsiElement = new TiXmlElement("imsi");
 			blackimsiElement->LinkEndChild(imsiElement);
 			TiXmlText *imsiContent = new TiXmlText((const char*)m_imsi);
@@ -1809,7 +1722,7 @@ DllExport int e_blackImsiCheckCallBack(int (*pFun)(int ipIndex, char*imsiList, i
 	return 1;
 }
 
-DllExport int e_cellStatusCallBack(int (*pFun)(int ipIndex, int status, CellConfigInfo* cellInfo)){ //状态 定位值
+DllExport int e_cellStatusCallBack(int (*pFun)(int ipIndex, int status, int earfcn,int mcc,char* mnc, int pci, int periodTac,int txpower)){ //状态 定位值
 	pCellStatusResponseFun = pFun;
 	return 1;
 }

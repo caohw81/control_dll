@@ -6,16 +6,34 @@
 --------------------Configuration: g_control_dll_test - Win32 Release--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\Users\Caohw\AppData\Local\Temp\RSPC3CC.tmp" with contents
+Creating command line "rc.exe /l 0x804 /fo"Release/g_control_dll_test.res" /d "NDEBUG" /d "_AFXDLL" "D:\myWork\2021WS\ws2021_gk\GK\control_dll\g_control_dll_test\g_control_dll_test.rc"" 
+Creating temporary file "C:\Users\chw\AppData\Local\Temp\RSP8E41.tmp" with contents
+[
+/nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\myWork\2021WS\ws2021_gk\GK\control_dll\g_control_dll_test\g_control_dll_test.cpp"
+]
+Creating command line "cl.exe @C:\Users\chw\AppData\Local\Temp\RSP8E41.tmp" 
+Creating temporary file "C:\Users\chw\AppData\Local\Temp\RSP8E42.tmp" with contents
+[
+/nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"Release/g_control_dll_test.pch" /Yc"stdafx.h" /Fo"Release/" /Fd"Release/" /FD /c 
+"D:\myWork\2021WS\ws2021_gk\GK\control_dll\g_control_dll_test\StdAfx.cpp"
+]
+Creating command line "cl.exe @C:\Users\chw\AppData\Local\Temp\RSP8E42.tmp" 
+Creating temporary file "C:\Users\chw\AppData\Local\Temp\RSP8E43.tmp" with contents
 [
 /nologo /subsystem:windows /incremental:no /pdb:"Release/g_control_dll_test.pdb" /machine:I386 /out:"Release/g_control_dll_test.exe" 
-".\Release\g_control_dll_test.obj"
-".\Release\g_control_dll_testDlg.obj"
-".\Release\StdAfx.obj"
-".\Release\g_control_dll_test.res"
+.\Release\g_control_dll_test.obj
+.\Release\g_control_dll_testDlg.obj
+.\Release\StdAfx.obj
+.\Release\g_control_dll_test.res
 ]
-Creating command line "link.exe @C:\Users\Caohw\AppData\Local\Temp\RSPC3CC.tmp"
+Creating command line "link.exe @C:\Users\chw\AppData\Local\Temp\RSP8E43.tmp"
 <h3>Output Window</h3>
+Compiling resources...
+Compiling...
+StdAfx.cpp
+Compiling...
+g_control_dll_test.cpp
 Linking...
 
 

@@ -17,8 +17,8 @@ typedef struct imsiReportInfo
 {
 	int ipIndex;
 	int userType;
-	char imsi[15];
-	char imei[15];
+	char imsi[16];
+	char imei[16];
 	int rsrp;
 } E_IMSIReportInfo;
 
@@ -370,7 +370,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			const char *cellid_char = p_cellid->GetText();
 			memset(cellInfo.cellid,0,sizeof(cellInfo.cellid));
 			memcpy(cellInfo.cellid,cellid_char,strlen(cellid_char));
-			//strcpy(cellInfo.cellid,cellid_char);		
+			//strcpy(cellInfo.cellid,cellid_char);
 */			
 			TiXmlElement* p_txpower = p_secLeaf->FirstChildElement("txpower");
 			const char *txpower_char = p_txpower->GetText();
@@ -502,13 +502,13 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 				const char *imsi_char = p_imsi->GetText();
 				memset(imsiInfo.imsi,0,sizeof(imsiInfo.imsi));
 				memcpy(imsiInfo.imsi,imsi_char,15);
-				//imsiInfo.imsi[15]='\0';
+				imsiInfo.imsi[15]='\0';
 			}else{
 				memset(imsiInfo.imsi,0,sizeof(imsiInfo.imsi));
 				for(int i=0;i<15;++i){
 					imsiInfo.imsi[i]='0';
 				}
-				//imsiInfo.imsi[15]='\0';
+				imsiInfo.imsi[15]='\0';
 			}		
 			
 			TiXmlElement* p_imei = p_secLeaf->FirstChildElement("imei");
@@ -728,19 +728,19 @@ DllExport void u_setCellConfig(int ipIndex, int euarfcn, int mcc,char* mnc, int 
     configurationElement->LinkEndChild(pciElement);
 	TiXmlText *pciContent = new TiXmlText(itoa(pci));
 	pciElement->LinkEndChild(pciContent);
-/*
+
 	TiXmlElement *tacElement = new TiXmlElement("tac");
     configurationElement->LinkEndChild(tacElement);
 	TiXmlText *tacContent = new TiXmlText(itoa(tac));
 	tacElement->LinkEndChild(tacContent);
-*/
+
 	
 	TiXmlElement *txpowerElement = new TiXmlElement("txpower");
     configurationElement->LinkEndChild(txpowerElement);
 	TiXmlText *txpowerContent = new TiXmlText(itoa(txpower));
 	txpowerElement->LinkEndChild(txpowerContent);
 	
-/*	TiXmlElement *periodTacElement = new TiXmlElement("periodTac");
+	TiXmlElement *periodTacElement = new TiXmlElement("periodTac");
     configurationElement->LinkEndChild(periodTacElement);
 	TiXmlText *periodTacContent = new TiXmlText(itoa(periodTac));
 	periodTacElement->LinkEndChild(periodTacContent);
@@ -757,7 +757,7 @@ DllExport void u_setCellConfig(int ipIndex, int euarfcn, int mcc,char* mnc, int 
 	
 	TiXmlElement *timeoutElement = new TiXmlElement("timeout");
     configurationElement->LinkEndChild(timeoutElement);
-*/
+
 	TiXmlPrinter *printer = new TiXmlPrinter();
 	rootElement->Accept(printer );//保存该节点及其子节点到字符串
 	CString strXML = printer->CStr();

@@ -525,11 +525,11 @@ DllExport void g_setRunningMode(int ipIndex,U8 carrierIndicat, U8 controlMode, U
 	
 	runningModeInfo.controlMode.lenth=0x04;
 	runningModeInfo.controlMode.serialNum=0x010a;
-	runningModeInfo.controlMode.data=workMode;
+	runningModeInfo.controlMode.data=controlMode;
 	
 	runningModeInfo.workMode.lenth=0x04;
 	runningModeInfo.workMode.serialNum=0x010b;
-	runningModeInfo.workMode.data=controlMode;
+	runningModeInfo.workMode.data=workMode;
 	
 	runningModeInfo.msgSendMode.lenth=0x04;
 	runningModeInfo.msgSendMode.serialNum=0x010c;

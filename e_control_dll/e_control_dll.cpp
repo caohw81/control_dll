@@ -30,7 +30,7 @@ typedef struct cellConfigInfo
 	int pci; 
 	int tac;
 	int periodTac;
-	char cellid[15];
+	char cellid[16];
 	int txpower;
 	int maxTxPower;
 } CellConfigInfo;
@@ -524,7 +524,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 					imsiInfo.imsi[i]='0';
 				}
 				imsiInfo.imsi[15]='\0';
-			}		
+			}
 			
 			TiXmlElement* p_imei = p_secLeaf->FirstChildElement("imei");
 			if(p_imei){

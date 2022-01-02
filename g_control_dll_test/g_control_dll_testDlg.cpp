@@ -451,10 +451,16 @@ void CG_control_dll_testDlg::setRunningMode()
 //	m_msgSendMode='0'+m_msgSendMode_int;
 
 
-	m_carrierIndicat=m_carrierIndicat_int;
+/*	m_carrierIndicat=m_carrierIndicat_int;
 	m_controlMode=m_controlMode_int;
 	m_workMode=m_workMode_int;
 	m_msgSendMode=m_msgSendMode_int;
+*/
+	m_carrierIndicat=m_carrierIndicat_int;
+	m_controlMode=0x01;
+	m_workMode=0x02;
+	m_msgSendMode=0x01;
+
 
 	typedef	 void (* SETRUNNINGMODE)(int ipIndex,U8 carrierIndicat, U8 controlMode, U8 workMode, U8 msgSendMode);
 	SETRUNNINGMODE pSetRunnigMode = (SETRUNNINGMODE)GetProcAddress(hDll,"g_setRunningMode");

@@ -68,3 +68,5 @@
 2021-12-25 20:08:04.539 init dll
 2021-12-25 20:08:10.234 g_carrFrePointCheck&&ipIndex:1,carNum:0
 2021-12-25 20:08:15.427 g_carrFrePointCheck&&ipIndex:1,carNum:1
+2022-01-01 20:05:42.305 init dll
+2022-01-01 20:05:48.000 g_setRunningMode&&ipIndex:1,carNum:0,controlMode:1,workMode:2,msgSendMode:1

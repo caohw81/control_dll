@@ -41,8 +41,9 @@ SOCKET  mserver;
 sockaddr_in m_atrget_addr;
 char recvBuf[2048]={0};
 int udpConnectFlag=1;
-
 int m_send_Port=51888;
+int heart_sleep_time=0;
+
 vector<string>m_recvIpVec;
 vector<int> m_recvIpPortVec;
 vector<int>m_stopIpVec;
@@ -114,7 +115,7 @@ CE_control_dllApp theApp;
 
 
 
-int sendMsg(int ipIndex, char* buff, int buffLenth){
+inline int sendMsg(int ipIndex, char* buff, int buffLenth){
 	//CString strip="192.168.2.52";	
 	//CString strip="127.0.0.1";
 	//char clientIp[20]={0};
@@ -154,6 +155,10 @@ int udpSocketInit(){
 	CString ip_recvNum="1";
 	GetPrivateProfileString("e_connect","ip_recvNum","1",ip_recvNum.GetBuffer(MAX_PATH),MAX_PATH,strIniPath);
 	int m_ip_recvNum = _ttoi(ip_recvNum);
+	
+	CString p_sleepTime="15000";
+	GetPrivateProfileString("e_connect","heart_sleep_time","15000",p_sleepTime.GetBuffer(MAX_PATH),MAX_PATH,strIniPath);
+	heart_sleep_time = _ttoi(p_sleepTime);	
 
 	CString ip_addr=_T("192.168.2.52");
 	CString recv_Port="51888";
@@ -251,11 +256,11 @@ UINT heartBeatTheard(LPVOID pr){
 #endif
 
 	while (udpConnectFlag){
-		Sleep(5000);
 		for(int i=0;i<m_recvIpVec.size();++i){
 			sendMsg(i+1,buff,lenth-1);
 			Sleep(10);
-		}		
+		}
+		Sleep(heart_sleep_time);		
 	}
 	delete docXml;
 	docXml = NULL;
@@ -547,7 +552,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			int m_rsrp=atoi(rsrp_char);
 			imsiInfo.rsrp=m_rsrp;
 
-			Log("4g_scanner@@ipIndex:%d, userType:%d,imsi:%s,imei:%s,rsrp:%d",ipIndex, m_userType,imsi_char,imei_char,m_rsrp);
+			Log("4g_scanner@@ipIndex:%d, userType:%d,imsi:%s,imei:%s,rsrp:%d",ipIndex, m_userType,imsiInfo.imsi,imsiInfo.imei,m_rsrp);
 			(*pIMSIReportFun)(&imsiInfo);			
 		}
 	}
@@ -623,9 +628,10 @@ DllExport void e_femtoStatusRequest(int ipIndex){
 
 	buff[lenth]='\0';
 	
-	Log("4g_femto_status_request@@ipIndex:%d",ipIndex);
+	Log("4g_femto_status_request begin@@ipIndex:%d",ipIndex);
 	if (udpConnectFlag){
 		sendMsg(ipIndex,buff,lenth-1);
+		Log("4g_femto_status_request end@@ipIndex:%d",ipIndex);
 	}
 	delete docXml;
 	docXml = NULL;
@@ -715,9 +721,9 @@ DllExport void e_setCellConfig(int ipIndex, int euarfcn, int mcc,char* mnc, int 
 #endif
 	
 	if (udpConnectFlag){
-		Log("4g_setCellConfig send begin.");
+		Log("4g_setCellConfig begin.");
 		if(sendMsg(ipIndex,buff,lenth-1)>0){
-			Log("4g_setCellConfig@@ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d,tac:%d,periodTac:%d",ipIndex, euarfcn,mcc,mnc,pci,tac,periodTac);
+			Log("4g_setCellConfig end@@ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d,tac:%d,periodTac:%d",ipIndex, euarfcn,mcc,mnc,pci,tac,periodTac);
 		}
 	}
 	delete docXml;
@@ -916,7 +922,7 @@ DllExport void e_setCellConfig(int ipIndex, int euarfcn, int mcc,char* mnc, int 
 }
 */
 
-DllExport void e_setBlackRedirection(int ipIndex, int arfcn){
+DllExport void  e_setBlackRedirection(int ipIndex, int arfcn){
 	TiXmlDocument *docXml = new TiXmlDocument();
 	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "UTF-8", "");
 	docXml->LinkEndChild(decl);
@@ -935,7 +941,7 @@ DllExport void e_setBlackRedirection(int ipIndex, int arfcn){
 
 	TiXmlElement *priorityElement = new TiXmlElement("priority");
     redirection_reqElement->LinkEndChild(priorityElement);
-	TiXmlText *priorityContent = new TiXmlText(itoa(2));
+	TiXmlText *priorityContent = new TiXmlText(itoa(5));
 	priorityElement->LinkEndChild(priorityContent);
 
 	TiXmlElement *GeranRedirectElement = new TiXmlElement("GeranRedirect");
@@ -945,7 +951,7 @@ DllExport void e_setBlackRedirection(int ipIndex, int arfcn){
 	
 	TiXmlElement *arfcnElement = new TiXmlElement("arfcn");
     redirection_reqElement->LinkEndChild(arfcnElement);
-	TiXmlText *arfcnContent = new TiXmlText(itoa(arfcn));
+	TiXmlText *arfcnContent = new TiXmlText(itoa(0));
 	arfcnElement->LinkEndChild(arfcnContent);
 	
 	TiXmlElement *UtranRedirectElement = new TiXmlElement("UtranRedirect");
@@ -970,7 +976,7 @@ DllExport void e_setBlackRedirection(int ipIndex, int arfcn){
 
 	TiXmlElement *RejectMethodElement = new TiXmlElement("RejectMethod");
     redirection_reqElement->LinkEndChild(RejectMethodElement);
-	TiXmlText *RejectMethodContent = new TiXmlText(itoa(1));
+	TiXmlText *RejectMethodContent = new TiXmlText(itoa(2));
 	RejectMethodElement->LinkEndChild(RejectMethodContent);
 
 //======================================
@@ -1097,9 +1103,9 @@ DllExport void e_setBlackRedirection(int ipIndex, int arfcn){
 	
 	
 	if (udpConnectFlag){
-		Log("4g_setBlackRedirection@@ipIndex:%d, arfcn:%d",ipIndex, arfcn);
+		Log("4g_setBlackRedirection begin@@ipIndex:%d, arfcn:%d",ipIndex, arfcn);
 		if(sendMsg(ipIndex, buff,lenth-1)>0){
-			Log("4g_setBlackRedirection@@ipIndex:%d,%s",ipIndex,buff);
+			Log("4g_setBlackRedirection end@@ipIndex:%d,%s",ipIndex,buff);
 		}
 	}
 	delete docXml;
@@ -1225,7 +1231,7 @@ DllExport void e_setWhiteRedirection(int ipIndex,int arfcn){
 
 	TiXmlElement *priorityElement3 = new TiXmlElement("priority");
     redirection_reqElement3->LinkEndChild(priorityElement3);
-	TiXmlText *priorityContent3 = new TiXmlText(itoa(2));
+	TiXmlText *priorityContent3 = new TiXmlText(itoa(5));
 	priorityElement3->LinkEndChild(priorityContent3);
 
 	TiXmlElement *GeranRedirectElement3 = new TiXmlElement("GeranRedirect");
@@ -1235,7 +1241,7 @@ DllExport void e_setWhiteRedirection(int ipIndex,int arfcn){
 	
 	TiXmlElement *arfcnElement3 = new TiXmlElement("arfcn");
     redirection_reqElement3->LinkEndChild(arfcnElement3);
-	TiXmlText *arfcnContent3 = new TiXmlText(itoa(arfcn));
+	TiXmlText *arfcnContent3 = new TiXmlText(itoa(0));
 	arfcnElement3->LinkEndChild(arfcnContent3);
 	
 	TiXmlElement *UtranRedirectElement3 = new TiXmlElement("UtranRedirect");
@@ -1260,7 +1266,7 @@ DllExport void e_setWhiteRedirection(int ipIndex,int arfcn){
 
 	TiXmlElement *RejectMethodElement3 = new TiXmlElement("RejectMethod");
     redirection_reqElement3->LinkEndChild(RejectMethodElement3);
-	TiXmlText *RejectMethodContent3 = new TiXmlText(itoa(1));
+	TiXmlText *RejectMethodContent3 = new TiXmlText(itoa(2));
 	RejectMethodElement3->LinkEndChild(RejectMethodContent3);
 	
 //==============================
@@ -1286,12 +1292,12 @@ DllExport void e_setWhiteRedirection(int ipIndex,int arfcn){
 
 	buff[lenth]='\0';
 #endif
-	Log("4g_setWhiteRedirection@@ipIndex:%d,%s",buff);
-	Log("4g_setWhiteRedirection@@ipIndex:%d, arfcn:%d",ipIndex, arfcn);
+	Log("4g_setWhiteRedirection begin@@ipIndex:%d,%s",buff);
+	Log("4g_setWhiteRedirection begin@@ipIndex:%d, arfcn:%d",ipIndex, arfcn);
 	
 	if (udpConnectFlag){
 		if(sendMsg(ipIndex, buff,lenth-1)>0){
-			Log("4g_setBlackRedirection@@ipIndex:%d,%s",ipIndex,buff);
+			Log("4g_setBlackRedirection end@@ipIndex:%d,%s",ipIndex,buff);
 		}
 	}
 	
@@ -1354,9 +1360,11 @@ DllExport void e_activeCell(int ipIndex,int active_mode, int mode){
 	buff[lenth]='\0';
 #endif
 
-	Log("4g_activeCell@@ipIndex:%d, active_mode:%d,mode:%d",ipIndex, active_mode,mode);
+	Log("4g_activeCell begin@@ipIndex:%d, active_mode:%d,mode:%d",ipIndex, active_mode,mode);
 	if (udpConnectFlag){
 		sendMsg(ipIndex, buff,lenth-1);
+		Log("4g_activeCell end@@ipIndex:%d, active_mode:%d,mode:%d",ipIndex, active_mode,mode);
+
 	}
 	delete docXml;
 	docXml = NULL;
@@ -1416,9 +1424,11 @@ DllExport void e_addWhiteImsi(int ipIndex, char* whiteImsi){
 	buff[lenth]='\0';
 #endif
 
-	Log("4g_addWhiteImsi@@ipIndex:%d, whiteImsi:%s",ipIndex, whiteImsi);
+	Log("4g_addWhiteImsi begin@@ipIndex:%d, whiteImsi:%s",ipIndex, whiteImsi);
 	if (udpConnectFlag){
 		sendMsg(ipIndex, buff,lenth-1);
+		Log("4g_addWhiteImsi end@@ipIndex:%d, whiteImsi:%s",ipIndex, whiteImsi);
+
 	}
 	delete docXml;
 	docXml = NULL;
@@ -1490,9 +1500,11 @@ DllExport void e_addBlackImsi(int ipIndex,char* blackImsi){
 	buff[lenth]='\0';
 #endif
 
-	Log("4g_addBlackImsi@@ipIndex:%d, blackImsi:%s",ipIndex, blackImsi);
+	Log("4g_addBlackImsi begin@@ipIndex:%d, blackImsi:%s",ipIndex, blackImsi);
 	if (udpConnectFlag){
 		sendMsg(ipIndex, buff,lenth-1);
+		Log("4g_addBlackImsi end@@ipIndex:%d, blackImsi:%s",ipIndex, blackImsi);
+
 	}
 	delete docXml;
 	docXml = NULL;
@@ -1561,9 +1573,11 @@ DllExport void e_deleteWhiteImsi(int ipIndex,char* whiteImsi, int n){
 	buff[lenth]='\0';
 #endif
 
-	Log("4g_deleteWhiteImsi@@ipIndex:%d, num:%d,whiteImsi:%s",ipIndex, n,whiteImsi);
+	Log("4g_deleteWhiteImsi begin@@ipIndex:%d, num:%d,whiteImsi:%s",ipIndex, n,whiteImsi);
 	if (udpConnectFlag){
 		sendMsg(ipIndex, buff,lenth-1);
+		Log("4g_deleteWhiteImsi end@@ipIndex:%d, num:%d,whiteImsi:%s",ipIndex, n,whiteImsi);
+
 	}
 	delete docXml;
 	docXml = NULL;
@@ -1633,9 +1647,11 @@ DllExport void e_deleteBlackImsi(int ipIndex,char* blackImsi,int n){
 	buff[lenth]='\0';
 #endif
 
-	Log("4g_deleteBlackImsi@@ipIndex:%d, num:%d,blackImsi:%s",ipIndex, n,blackImsi);
+	Log("4g_deleteBlackImsi begin@@ipIndex:%d, num:%d,blackImsi:%s",ipIndex, n,blackImsi);
 	if (udpConnectFlag){
 		sendMsg(ipIndex, buff,lenth-1);
+		Log("4g_deleteBlackImsi end@@ipIndex:%d, num:%d,blackImsi:%s",ipIndex, n,blackImsi);
+
 	}
 	delete docXml;
 	docXml = NULL;
@@ -1685,9 +1701,10 @@ DllExport void e_imsiListCheck(int ipIndex){
 	buff[lenth]='\0';
 #endif
 	
-	Log("4g_imsiListCheck@@ipIndex:%d",ipIndex);
+	Log("4g_imsiListCheck begin@@ipIndex:%d",ipIndex);
 	if (udpConnectFlag){
 		sendMsg(ipIndex,buff,lenth-1);
+		Log("4g_imsiListCheck end@@ipIndex:%d",ipIndex);
 	}
 	delete docXml;
 	docXml = NULL;

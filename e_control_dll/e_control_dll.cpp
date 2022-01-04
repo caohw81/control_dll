@@ -44,6 +44,8 @@ int udpConnectFlag=1;
 int m_send_Port=51888;
 int heart_sleep_time=0;
 
+pthread_mutex_t send_mutex;
+
 vector<string>m_recvIpVec;
 vector<int> m_recvIpPortVec;
 vector<int>m_stopIpVec;
@@ -562,7 +564,7 @@ UINT Main_Socket_Thread(LPVOID pr){
 	InitLog();
 	udpSocketInit();
 	Log("init dll");
-	AfxBeginThread( heartBeatTheard, NULL );//ÐÄÌø
+	//AfxBeginThread( heartBeatTheard, NULL );//ÐÄÌø
 	
 	struct sockaddr_in from;
 	int fromlen =sizeof(from);		

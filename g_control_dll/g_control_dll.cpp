@@ -391,7 +391,7 @@ UINT Main_Socket_Thread(LPVOID pr){
 	InitLog();
 	udpSocketInit();
 	Log("g_init dll");
-	AfxBeginThread( heartBeatTheard, NULL );//ĞÄÌø
+	//AfxBeginThread( heartBeatTheard, NULL );//ĞÄÌø
 	
 	struct sockaddr_in from;
 	int fromlen =sizeof(from);		

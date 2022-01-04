@@ -43,10 +43,8 @@ char recvBuf[2048]={0};
 int udpConnectFlag=1;
 int m_send_Port=51888;
 int heart_sleep_time=0;
-pthread_mutex_t queue_mutex=PTHREAD_MUTEX_INITIALIZER;
-queue<int>ipIndexQue;
-queue<string>msgSendQue;
-queue<int>msgLenthQue;
+
+pthread_mutex_t send_mutex;
 
 vector<string>m_recvIpVec;
 vector<int> m_recvIpPortVec;
@@ -138,39 +136,6 @@ inline int sendMsg(int ipIndex, char* buff, int buffLenth){
         return 0;
     }
     return ret;
-}
-
-UINT msgSendTheard(LPVOID pr){
-	int ipIndex=0;
-	string buff="";
-	int buffLenth=0;
-
-	while(udpConnectFlag){
-		while(!ipIndexQue.empty()){
-			pthread_mutex_lock(&queue_mutex);
-			ipIndex = ipIndexQue.front();
-			ipIndexQue.pop();
-			buff=msgSendQue.front();
-			msgSendQue.pop();
-			buffLenth=msgLenthQue.front();
-			msgLenthQue.pop();
-			pthread_mutex_unlock(&queue_mutex);
-			
-			m_atrget_addr.sin_family = AF_INET;
-			m_atrget_addr.sin_port = htons(m_recvIpPortVec[ipIndex-1]);  //¶Ë¿Ú
-			m_atrget_addr.sin_addr.s_addr = inet_addr(m_recvIpVec[ipIndex-1].c_str());
-					
-			int ret = sendto(mserver, buff.c_str(), buffLenth, 0, 
-				(SOCKADDR *)&(m_atrget_addr), sizeof(SOCKADDR));
-			if (SOCKET_ERROR == ret)
-			{
-				Log("g_send_error && ipIndex:%d, buff:%s",ipIndex, buff.c_str());
-			}
-			Sleep(50);
-		}
-		Sleep(1000);
-	}
-    return 1;
 }
 
 int udpSocketInit(){
@@ -295,7 +260,7 @@ UINT heartBeatTheard(LPVOID pr){
 	while (udpConnectFlag){
 		for(int i=0;i<m_recvIpVec.size();++i){
 			sendMsg(i+1,buff,lenth-1);
-			Sleep(5);
+			Sleep(10);
 		}
 		Sleep(heart_sleep_time);		
 	}
@@ -600,7 +565,6 @@ UINT Main_Socket_Thread(LPVOID pr){
 	udpSocketInit();
 	Log("init dll");
 	//AfxBeginThread( heartBeatTheard, NULL );//ÐÄÌø
-	AfxBeginThread(msgSendTheard,NULL);
 	
 	struct sockaddr_in from;
 	int fromlen =sizeof(from);		
@@ -668,14 +632,7 @@ DllExport void e_femtoStatusRequest(int ipIndex){
 	
 	Log("4g_femto_status_request begin@@ipIndex:%d",ipIndex);
 	if (udpConnectFlag){
-		//sendMsg(ipIndex,buff,lenth-1);
-		string msg=	buff;
-		pthread_mutex_lock(&queue_mutex);
-		ipIndexQue.push(ipIndex);
-		msgSendQue.push(msg);
-		msgLenthQue.push(lenth-1);
-		pthread_mutex_unlock(&queue_mutex);
-		
+		sendMsg(ipIndex,buff,lenth-1);
 		Log("4g_femto_status_request end@@ipIndex:%d",ipIndex);
 	}
 	delete docXml;
@@ -767,19 +724,9 @@ DllExport void e_setCellConfig(int ipIndex, int euarfcn, int mcc,char* mnc, int 
 	
 	if (udpConnectFlag){
 		Log("4g_setCellConfig begin.");
-		
-		string msg=	buff;
-		pthread_mutex_lock(&queue_mutex);
-		ipIndexQue.push(ipIndex);
-		msgSendQue.push(msg);
-		msgLenthQue.push(lenth-1);
-		pthread_mutex_unlock(&queue_mutex);
-		
-		Log("4g_setCellConfig end@@ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d,tac:%d,periodTac:%d",ipIndex, euarfcn,mcc,mnc,pci,tac,periodTac);
-
-		// if(sendMsg(ipIndex,buff,lenth-1)>0){
-			// Log("4g_setCellConfig end@@ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d,tac:%d,periodTac:%d",ipIndex, euarfcn,mcc,mnc,pci,tac,periodTac);
-		// }
+		if(sendMsg(ipIndex,buff,lenth-1)>0){
+			Log("4g_setCellConfig end@@ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d,tac:%d,periodTac:%d",ipIndex, euarfcn,mcc,mnc,pci,tac,periodTac);
+		}
 	}
 	delete docXml;
 	docXml = NULL;
@@ -1159,18 +1106,9 @@ DllExport void  e_setBlackRedirection(int ipIndex, int arfcn){
 	
 	if (udpConnectFlag){
 		Log("4g_setBlackRedirection begin@@ipIndex:%d, arfcn:%d",ipIndex, arfcn);
-		
-		string msg=	buff;
-		pthread_mutex_lock(&queue_mutex);
-		ipIndexQue.push(ipIndex);
-		msgSendQue.push(msg);
-		msgLenthQue.push(lenth-1);
-		pthread_mutex_unlock(&queue_mutex);
-		Log("4g_setBlackRedirection end@@ipIndex:%d,%s",ipIndex,buff);
-
-		// if(sendmsg(ipindex, buff,lenth-1)>0){
-			// log("4g_setblackredirection end@@ipindex:%d,%s",ipindex,buff);
-		// }
+		if(sendMsg(ipIndex, buff,lenth-1)>0){
+			Log("4g_setBlackRedirection end@@ipIndex:%d,%s",ipIndex,buff);
+		}
 	}
 	delete docXml;
 	docXml = NULL;
@@ -1360,17 +1298,9 @@ DllExport void e_setWhiteRedirection(int ipIndex,int arfcn){
 	Log("4g_setWhiteRedirection begin@@ipIndex:%d, arfcn:%d",ipIndex, arfcn);
 	
 	if (udpConnectFlag){
-		string msg=	buff;
-		pthread_mutex_lock(&queue_mutex);
-		ipIndexQue.push(ipIndex);
-		msgSendQue.push(msg);
-		msgLenthQue.push(lenth-1);
-		pthread_mutex_unlock(&queue_mutex);
-		Log("4g_setBlackRedirection end@@ipIndex:%d,%s",ipIndex,buff);
-		
-		// if(sendMsg(ipIndex, buff,lenth-1)>0){
-			// Log("4g_setBlackRedirection end@@ipIndex:%d,%s",ipIndex,buff);
-		// }
+		if(sendMsg(ipIndex, buff,lenth-1)>0){
+			Log("4g_setBlackRedirection end@@ipIndex:%d,%s",ipIndex,buff);
+		}
 	}
 	
 	delete docXml;
@@ -1434,14 +1364,7 @@ DllExport void e_activeCell(int ipIndex,int active_mode, int mode){
 
 	Log("4g_activeCell begin@@ipIndex:%d, active_mode:%d,mode:%d",ipIndex, active_mode,mode);
 	if (udpConnectFlag){
-		string msg=	buff;
-		pthread_mutex_lock(&queue_mutex);
-		ipIndexQue.push(ipIndex);
-		msgSendQue.push(msg);
-		msgLenthQue.push(lenth-1);
-		pthread_mutex_unlock(&queue_mutex);	
-		
-		//sendMsg(ipIndex, buff,lenth-1);
+		sendMsg(ipIndex, buff,lenth-1);
 		Log("4g_activeCell end@@ipIndex:%d, active_mode:%d,mode:%d",ipIndex, active_mode,mode);
 
 	}
@@ -1505,14 +1428,7 @@ DllExport void e_addWhiteImsi(int ipIndex, char* whiteImsi){
 
 	Log("4g_addWhiteImsi begin@@ipIndex:%d, whiteImsi:%s",ipIndex, whiteImsi);
 	if (udpConnectFlag){
-		string msg=	buff;
-		pthread_mutex_lock(&queue_mutex);
-		ipIndexQue.push(ipIndex);
-		msgSendQue.push(msg);
-		msgLenthQue.push(lenth-1);
-		pthread_mutex_unlock(&queue_mutex);	
-		
-		//sendMsg(ipIndex, buff,lenth-1);
+		sendMsg(ipIndex, buff,lenth-1);
 		Log("4g_addWhiteImsi end@@ipIndex:%d, whiteImsi:%s",ipIndex, whiteImsi);
 
 	}
@@ -1588,14 +1504,7 @@ DllExport void e_addBlackImsi(int ipIndex,char* blackImsi){
 
 	Log("4g_addBlackImsi begin@@ipIndex:%d, blackImsi:%s",ipIndex, blackImsi);
 	if (udpConnectFlag){
-		string msg=	buff;
-		pthread_mutex_lock(&queue_mutex);
-		ipIndexQue.push(ipIndex);
-		msgSendQue.push(msg);
-		msgLenthQue.push(lenth-1);
-		pthread_mutex_unlock(&queue_mutex);	
-		
-		//sendMsg(ipIndex, buff,lenth-1);
+		sendMsg(ipIndex, buff,lenth-1);
 		Log("4g_addBlackImsi end@@ipIndex:%d, blackImsi:%s",ipIndex, blackImsi);
 
 	}
@@ -1668,14 +1577,7 @@ DllExport void e_deleteWhiteImsi(int ipIndex,char* whiteImsi, int n){
 
 	Log("4g_deleteWhiteImsi begin@@ipIndex:%d, num:%d,whiteImsi:%s",ipIndex, n,whiteImsi);
 	if (udpConnectFlag){
-		string msg=	buff;
-		pthread_mutex_lock(&queue_mutex);
-		ipIndexQue.push(ipIndex);
-		msgSendQue.push(msg);
-		msgLenthQue.push(lenth-1);
-		pthread_mutex_unlock(&queue_mutex);	
-		
-		//sendMsg(ipIndex, buff,lenth-1);
+		sendMsg(ipIndex, buff,lenth-1);
 		Log("4g_deleteWhiteImsi end@@ipIndex:%d, num:%d,whiteImsi:%s",ipIndex, n,whiteImsi);
 
 	}
@@ -1749,14 +1651,7 @@ DllExport void e_deleteBlackImsi(int ipIndex,char* blackImsi,int n){
 
 	Log("4g_deleteBlackImsi begin@@ipIndex:%d, num:%d,blackImsi:%s",ipIndex, n,blackImsi);
 	if (udpConnectFlag){
-		string msg=	buff;
-		pthread_mutex_lock(&queue_mutex);
-		ipIndexQue.push(ipIndex);
-		msgSendQue.push(msg);
-		msgLenthQue.push(lenth-1);
-		pthread_mutex_unlock(&queue_mutex);	
-		
-		//sendMsg(ipIndex, buff,lenth-1);
+		sendMsg(ipIndex, buff,lenth-1);
 		Log("4g_deleteBlackImsi end@@ipIndex:%d, num:%d,blackImsi:%s",ipIndex, n,blackImsi);
 
 	}
@@ -1810,14 +1705,7 @@ DllExport void e_imsiListCheck(int ipIndex){
 	
 	Log("4g_imsiListCheck begin@@ipIndex:%d",ipIndex);
 	if (udpConnectFlag){
-		string msg=	buff;
-		pthread_mutex_lock(&queue_mutex);
-		ipIndexQue.push(ipIndex);
-		msgSendQue.push(msg);
-		msgLenthQue.push(lenth-1);
-		pthread_mutex_unlock(&queue_mutex);	
-		
-		//sendMsg(ipIndex,buff,lenth-1);
+		sendMsg(ipIndex,buff,lenth-1);
 		Log("4g_imsiListCheck end@@ipIndex:%d",ipIndex);
 	}
 	delete docXml;

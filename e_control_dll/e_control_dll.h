@@ -20,11 +20,7 @@
 #include <string>
 #include <list>
 #include <vector>
-#include <queue>
-#include<pthread.h>
-#include "log_out.h"
-
-#pragma comment(lib, "pthreadVC2.lib")
+#include <pthread.h>
 
 using namespace std;
 /////////////////////////////////////////////////////////////////////////////

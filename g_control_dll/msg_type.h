@@ -15,6 +15,7 @@ typedef char U8 ;
 #define RESTARTSYSTEM 0x06
 #define RESTARTCARD 0x07
 #define CARRFREPOINTCHECK 0x08
+#define CHECKMSG 0x09
 
 #define ADDBLACKIMSI 0x50
 #define ADDWHITEIMSI 0x51

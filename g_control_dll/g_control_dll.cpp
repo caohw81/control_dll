@@ -464,6 +464,7 @@ DllExport void g_initRun(){
 	AfxBeginThread( Main_Socket_Thread, NULL );
 }
 
+
 DllExport void g_carrFrePointCheck(int ipIndex,U8 carrierIndicat){
 	CarrFrePointCheck carrCheckInfo;
 	

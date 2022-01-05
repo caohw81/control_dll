@@ -22,6 +22,10 @@ char recvBuf[1024]={0};
 int udpConnectFlag=1;
 int m_send_Port=5557;
 int heart_sleep_time=0;
+pthread_mutex_t queue_mutex=PTHREAD_MUTEX_INITIALIZER;
+queue<int>ipIndexQue;
+queue<string>msgSendQue;
+queue<int>msgLenthQue;
 
 typedef int (*HEARTBEATCALLBACKFUN)(int ipIndex, char carrIndex,int state);
 typedef int (*MSGREPORTCALLBACKFUN)(MsgInfo* p_msgInfo);
@@ -107,6 +111,39 @@ inline int sendMsg(int ipIndex, char* buff, int buffLenth){
         return 0;
     }
     return ret;
+}
+
+UINT msgSendTheard(LPVOID pr){
+	int ipIndex=0;
+	string buff="";
+	int buffLenth=0;
+
+	while(udpConnectFlag){
+		while(!ipIndexQue.empty()){
+			pthread_mutex_lock(&queue_mutex);
+			ipIndex = ipIndexQue.front();
+			ipIndexQue.pop();
+			buff=msgSendQue.front();
+			msgSendQue.pop();
+			buffLenth=msgLenthQue.front();
+			msgLenthQue.pop();
+			pthread_mutex_unlock(&queue_mutex);
+			
+			m_atrget_addr.sin_family = AF_INET;
+			m_atrget_addr.sin_port = htons(m_recvIpPortVec[ipIndex-1]);  //¶Ë¿Ú
+			m_atrget_addr.sin_addr.s_addr = inet_addr(m_recvIpVec[ipIndex-1].c_str());
+					
+			int ret = sendto(mserver, buff.c_str(), buffLenth, 0, 
+				(SOCKADDR *)&(m_atrget_addr), sizeof(SOCKADDR));
+			if (SOCKET_ERROR == ret)
+			{
+				Log("g_send_error && ipIndex:%d, buff:%s",ipIndex, buff.c_str());
+			}
+			Sleep(50);
+		}
+		Sleep(1000);
+	}
+    return 1;
 }
 
 int udpSocketInit(){
@@ -197,12 +234,11 @@ UINT heartBeatTheard(LPVOID pr){
 			memcpy(buff,&heartBeat,sizeof(MsgHeader));	
 			sendMsg(i+1,buff,sizeof(MsgHeader));
 			
-			Sleep(5);
+			Sleep(10);
 			heartBeat.msgCarrier=1;
 			memset(buff,0,sizeof(buff));
 			memcpy(buff,&heartBeat,sizeof(MsgHeader));	
 			sendMsg(i+1,buff,sizeof(MsgHeader));
-			Sleep(5);
 		}
 		Sleep(heart_sleep_time);		
 	}
@@ -231,6 +267,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			reportInfo.carrFrePoint=atoi(carrInfo->carr.data);
 
 			//(*pCarrCheckInfo)(&reportInfo);
+			Log("g_check carri pooint Ok & ipIndex:%d, carrIndex:%d, carrNum:%d",ipIndex,reportInfo.carrierIndex,reportInfo.carrFrePoint);
 			(*pCarrCheckInfo)(ipIndex,carrInfo->header.msgCarrier,atoi(carrInfo->carr.data));
 		}
 	}
@@ -392,6 +429,7 @@ UINT Main_Socket_Thread(LPVOID pr){
 	udpSocketInit();
 	Log("g_init dll");
 	//AfxBeginThread( heartBeatTheard, NULL );//ÐÄÌø
+	AfxBeginThread(msgSendTheard,NULL);
 	
 	struct sockaddr_in from;
 	int fromlen =sizeof(from);		
@@ -426,6 +464,126 @@ DllExport void g_initRun(){
 	AfxBeginThread( Main_Socket_Thread, NULL );
 }
 
+
+//*****************************************************
+
+DllExport void g_checkMsg(int ipIndex,U8 carrierIndicat){
+	CheckMsg msg;
+	msg.header.msgLenth=sizeof(CheckMsg);
+	msg.header.msgSerialNum=CHECKMSG;
+	msg.header.msgCodeNum=0x01;
+	msg.header.msgCarrier=carrierIndicat;
+	msg.header.msgParam=0;
+//	
+	msg.mcc.lenth=0x0b;
+	msg.mcc.serialNum=0x0101;
+	memset(msg.mcc.data,0,8);
+	for(int i=0;i<8;++i){
+		msg.mcc.data[i]=0x00;
+	}
+	//memcpy(msg.mcc.data,mcc,strlen(mcc));
+	
+	msg.mnc.lenth=0x0b;
+	msg.mnc.serialNum=0x0102;
+	memset(msg.mnc.data,0,8);
+	for(int i=0;i<8;++i){
+		msg.mnc.data[i]=0x00;
+	}
+	//memcpy(msg.mnc.data,mnc,strlen(mnc));
+	
+	msg.lac.lenth=0x0b;
+	msg.lac.serialNum=0x0103;
+	memset(msg.lac.data,0,8);
+	for(int i=0;i<8;++i){
+		msg.lac.data[i]=0x00;
+	}
+	//memcpy(msg.lac.data,lac,strlen(lac));
+
+
+	msg.ci.lenth=0x0b;
+	msg.ci.serialNum=0x0104;
+	memset(msg.ci.data,0,8);
+	for(int i=0;i<8;++i){
+		msg.ci.data[i]=0x00;
+	}
+	//memcpy(msg.ci.data,ci,strlen(ci));
+
+	
+	msg.tac.lenth=0x07;
+	msg.tac.serialNum=0x011b;
+	memset(msg.tac.data,0,4);
+	for(int i=0;i<4;++i){
+		msg.tac.data[i]=0x00;
+	}
+	//memcpy(msg.tac.data,tac,strlen(tac));
+	
+	
+	msg.carrierFrePoint.lenth=0x0b;
+	msg.carrierFrePoint.serialNum=0x0150;
+	memset(msg.carrierFrePoint.data,0,8);
+	for(int i=0;i<8;++i){
+		msg.carrierFrePoint.data[i]=0x00;
+	}
+	//memcpy(msg.carrierFrePoint.data,carrierFrePoint,strlen(carrierFrePoint));
+
+	
+	msg.downAttenuation.lenth=0x0b;
+	msg.downAttenuation.serialNum=0x0151;
+	memset(msg.downAttenuation.data,0,8);
+	for(int i=0;i<8;++i){
+		msg.downAttenuation.data[i]=0x00;
+	}
+	//memcpy(msg.downAttenuation.data,downAttenuation,strlen(downAttenuation));
+	
+//	
+	msg.controlMode.lenth=0x04;
+	msg.controlMode.serialNum=0x010a;
+	msg.controlMode.data=0;
+	
+	msg.workMode.lenth=0x04;
+	msg.workMode.serialNum=0x010b;
+	msg.workMode.data=0;
+	
+	msg.msgSendMode.lenth=0x04;
+	msg.msgSendMode.serialNum=0x010c;
+	msg.msgSendMode.data=0;
+
+//
+	msg.radioFreq.lenth=0x07;
+	msg.radioFreq.serialNum=0x0002;
+	memset(msg.radioFreq.data,0,4);
+	for(int i=0;i<4;++i){
+		msg.radioFreq.data[i]=0x00;
+	}
+	
+	
+	char buff[sizeof(CheckMsg)+1];
+	memset(buff,0,sizeof(buff));
+	memcpy(buff,&msg,sizeof(CheckMsg));
+	buff[sizeof(CheckMsg)]='\0';
+		
+
+	Log("g_checkMsg begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	//sendMsg(ipIndex, buff, sizeof(CarrFrePointCheck));
+	string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(CarrFrePointCheck));
+	pthread_mutex_unlock(&queue_mutex);
+	Log("g_checkMsg end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	
+	
+}
+
+
+
+
+
+
+
+//****************************************************
+
 DllExport void g_carrFrePointCheck(int ipIndex,U8 carrierIndicat){
 	CarrFrePointCheck carrCheckInfo;
 	
@@ -447,9 +605,16 @@ DllExport void g_carrFrePointCheck(int ipIndex,U8 carrierIndicat){
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&carrCheckInfo,sizeof(CarrFrePointCheck));
 	buff[sizeof(CarrFrePointCheck)]='\0';
-	Log("g_carrFrePointCheck begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+		
 
-	sendMsg(ipIndex, buff, sizeof(CarrFrePointCheck));
+	Log("g_carrFrePointCheck begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	//sendMsg(ipIndex, buff, sizeof(CarrFrePointCheck));
+	string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(CarrFrePointCheck));
+	pthread_mutex_unlock(&queue_mutex);
 	Log("g_carrFrePointCheck end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 }
 
@@ -518,7 +683,13 @@ DllExport void g_setCellConfig(int ipIndex,U8 carrierIndicat, U8* mcc,U8* mnc, U
 	memcpy(buff,&cellInfo,sizeof(CellConfig));
 	Log("g_setCellConfig begin&&ipIndex:%d,carNum:%d,mcc:%s,mnc:%s,lac:%s,ci:%s,tac:%s,carrier:%s,downAtten:%s",ipIndex,carrierIndicat,mcc,mnc,lac,ci,tac,carrierFrePoint,downAttenuation);
 	//Log("setCellConfig:%s",buff);
-	sendMsg(ipIndex, buff, sizeof(CellConfig));
+	//sendMsg(ipIndex, buff, sizeof(CellConfig));
+	string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(CellConfig));
+	pthread_mutex_unlock(&queue_mutex);
 	Log("g_setCellConfig end&&ipIndex:%d,carNum:%d,mcc:%s,mnc:%s,lac:%s,ci:%s,tac:%s,carrier:%s,downAtten:%s",ipIndex,carrierIndicat,mcc,mnc,lac,ci,tac,carrierFrePoint,downAttenuation);
 
 }
@@ -549,7 +720,13 @@ DllExport void g_setRunningMode(int ipIndex,U8 carrierIndicat, U8 controlMode, U
 	
 	Log("g_setRunningMode begin &&ipIndex:%d,carNum:%d,controlMode:%d,workMode:%d,msgSendMode:%d",ipIndex,carrierIndicat,controlMode,workMode,msgSendMode);
 
-	sendMsg(ipIndex, buff, sizeof(RunningMode));
+	//sendMsg(ipIndex, buff, sizeof(RunningMode));
+		string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(RunningMode));
+	pthread_mutex_unlock(&queue_mutex);
 	Log("g_setRunningMode end &&ipIndex:%d,carNum:%d,controlMode:%d,workMode:%d,msgSendMode:%d",ipIndex,carrierIndicat,controlMode,workMode,msgSendMode);
 
 }
@@ -567,7 +744,13 @@ DllExport void g_turnOnRF(int ipIndex,U8 carrierIndicat){
 	memcpy(buff,&headerInfo,sizeof(MsgHeader));
 	Log("g_turnOnRF begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
-	sendMsg(ipIndex, buff, sizeof(MsgHeader));
+	//sendMsg(ipIndex, buff, sizeof(MsgHeader));
+		string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(MsgHeader));
+	pthread_mutex_unlock(&queue_mutex);
 	Log("g_turnOnRF end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
 }
@@ -584,7 +767,13 @@ DllExport void g_turnOffRF(int ipIndex,U8 carrierIndicat){
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&headerInfo,sizeof(MsgHeader));
 	Log("g_turnOffRF begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
-	sendMsg(ipIndex, buff, sizeof(MsgHeader));
+	//sendMsg(ipIndex, buff, sizeof(MsgHeader));
+		string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(MsgHeader));
+	pthread_mutex_unlock(&queue_mutex);
 	Log("g_turnOffRF end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
 }
@@ -601,7 +790,13 @@ DllExport void g_restartSystem(int ipIndex,U8 carrierIndicat){
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&headerInfo,sizeof(MsgHeader));
 	Log("g_restartSystem begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
-	sendMsg(ipIndex, buff, sizeof(MsgHeader));
+	//sendMsg(ipIndex, buff, sizeof(MsgHeader));
+		string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(MsgHeader));
+	pthread_mutex_unlock(&queue_mutex);
 	Log("g_restartSystem end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
 }
@@ -619,7 +814,13 @@ DllExport void g_restartCard(int ipIndex,U8 carrierIndicat){
 	memcpy(buff,&headerInfo,sizeof(MsgHeader));
 	buff[sizeof(MsgHeader)]='\0';	
 	Log("g_restartCard begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
-	sendMsg(ipIndex, buff, sizeof(MsgHeader));
+	//sendMsg(ipIndex, buff, sizeof(MsgHeader));
+		string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(MsgHeader));
+	pthread_mutex_unlock(&queue_mutex);
 	Log("g_restartCard end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
 }
@@ -647,7 +848,13 @@ DllExport void g_addBlackImsi(int ipIndex,U8 carrierIndicat,char* imsi){
 	memcpy(buff,&addImsiInfo,sizeof(DataInfo_35));
 	buff[sizeof(DataInfo_35)]='\0';	
 	Log("g_addBlackImsi begin &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
-	sendMsg(ipIndex, buff, sizeof(DataInfo_35));
+	//sendMsg(ipIndex, buff, sizeof(DataInfo_35));
+		string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(DataInfo_35));
+	pthread_mutex_unlock(&queue_mutex);
 	Log("g_addBlackImsi end &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
 
 }
@@ -675,7 +882,13 @@ DllExport void g_addWhiteImsi(int ipIndex,U8 carrierIndicat,char* imsi){
 	memcpy(buff,&addImsiInfo,sizeof(DataInfo_35));
 	buff[sizeof(DataInfo_35)]='\0';	
 	Log("g_addWhiteImsi begin &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
-	sendMsg(ipIndex, buff, sizeof(DataInfo_35));
+	//sendMsg(ipIndex, buff, sizeof(DataInfo_35));
+		string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(DataInfo_35));
+	pthread_mutex_unlock(&queue_mutex);
 	Log("g_addWhiteImsi end &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
 
 }
@@ -697,7 +910,13 @@ DllExport void g_checkBlackImsi(int ipIndex,U8 carrierIndicat){
 	buff[sizeof(DataInfo_0)]='\0';	
 	Log("g_checkBlackImsi begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
-	sendMsg(ipIndex, buff, sizeof(DataInfo_0));
+	//sendMsg(ipIndex, buff, sizeof(DataInfo_0));
+		string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(DataInfo_0));
+	pthread_mutex_unlock(&queue_mutex);
 	Log("g_checkBlackImsi end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
 }
@@ -719,7 +938,13 @@ DllExport void g_checkWhiteImsi(int ipIndex,U8 carrierIndicat){
 	buff[sizeof(DataInfo_0)]='\0';		
 	Log("g_checkWhiteImsi begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
-	sendMsg(ipIndex, buff, sizeof(DataInfo_0));
+	//sendMsg(ipIndex, buff, sizeof(DataInfo_0));
+		string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(DataInfo_0));
+	pthread_mutex_unlock(&queue_mutex);
 	Log("g_checkWhiteImsi end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
 }
@@ -748,7 +973,13 @@ DllExport void g_deleteBlackImsi(int ipIndex,U8 carrierIndicat,char* imsi){
 	buff[sizeof(DataInfo_35)]='\0';	
 	Log("g_deleteBlackImsi begin &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
 
-	sendMsg(ipIndex, buff, sizeof(DataInfo_35));
+	//sendMsg(ipIndex, buff, sizeof(DataInfo_35));
+		string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(DataInfo_35));
+	pthread_mutex_unlock(&queue_mutex);
 	Log("g_deleteBlackImsi end &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
 
 }
@@ -777,7 +1008,13 @@ DllExport void g_deleteWhiteImsi(int ipIndex,U8 carrierIndicat,char* imsi){
 	buff[sizeof(DataInfo_35)]='\0';	
 	Log("g_deleteWhiteImsi begin &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
 
-	sendMsg(ipIndex, buff, sizeof(DataInfo_35));
+	//sendMsg(ipIndex, buff, sizeof(DataInfo_35));
+		string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(DataInfo_35));
+	pthread_mutex_unlock(&queue_mutex);
 	Log("g_deleteWhiteImsi end &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
 
 }
@@ -799,7 +1036,13 @@ DllExport void g_clearBlackImsiList(int ipIndex,U8 carrierIndicat){
 	buff[sizeof(DataInfo_0)]='\0';	
 	Log("g_clearBlackImsiList begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
-	sendMsg(ipIndex, buff, sizeof(DataInfo_0));
+	//sendMsg(ipIndex, buff, sizeof(DataInfo_0));
+		string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(DataInfo_0));
+	pthread_mutex_unlock(&queue_mutex);
 	Log("g_clearBlackImsiList end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
 }
@@ -821,7 +1064,13 @@ DllExport void g_clearWhiteImsiList(int ipIndex,U8 carrierIndicat){
 	buff[sizeof(DataInfo_0)]='\0';
 	Log("g_clearWhiteImsiList begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
-	sendMsg(ipIndex, buff, sizeof(DataInfo_0));
+	//sendMsg(ipIndex, buff, sizeof(DataInfo_0));
+		string msg=	buff;
+	pthread_mutex_lock(&queue_mutex);
+	ipIndexQue.push(ipIndex);
+	msgSendQue.push(msg);
+	msgLenthQue.push(sizeof(DataInfo_0));
+	pthread_mutex_unlock(&queue_mutex);
 	Log("g_clearWhiteImsiList end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
 }

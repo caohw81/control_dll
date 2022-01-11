@@ -15,6 +15,7 @@ typedef char U8 ;
 #define RESTARTSYSTEM 0x06
 #define RESTARTCARD 0x07
 #define CARRFREPOINTCHECK 0x08
+#define CHECKMSG 0x09
 
 #define ADDBLACKIMSI 0x50
 #define ADDWHITEIMSI 0x51
@@ -145,6 +146,64 @@ typedef struct carrFrePointCheck{
 	Unit_8  carr;
 }CarrFrePointCheck;
 
+typedef struct checkMsg{
+	MsgHeader header;
+	
+	Unit_8  mcc;				//
+	Unit_8  mnc;
+	Unit_8  lac;
+	Unit_8  ci;
+	//Unit_4  tac;
+	Unit_8  carrierFrePoint;
+	Unit_8  downAttenuation;
+	
+	Unit_1  controlMode;
+	Unit_1  workMode;
+	Unit_1 msgSendMode;
+	
+	Unit_4 radioFreq;
+	
+}CheckMsg;
+
+
+typedef struct checkMsgInfo{
+	int ipIndex; 		
+	U8 carrierIndex;
+	
+	char  mcc[8];				//
+	char  mnc[8];
+	char  lac[8];
+	char  ci[8];
+	char  carrierFrePoint[8];
+	char  downAttenuation[8];
+	
+	char controlMode;
+	char workMode;
+	char msgSendMode;
+	
+	char radioFreq;	
+}CheckMsgInfo;
+
+
+/*
+typedef struct checkMsgInfo{
+	int ipIndex; 		
+	U8 carrierIndex;
+	
+	char  mcc[9];				//
+	char  mnc[9];
+	char  lac[9];
+	char  ci[9];
+	char  carrierFrePoint[9];
+	char  downAttenuation[9];
+	
+	char controlMode;
+	char workMode;
+	char msgSendMode;
+	
+	char radioFreq;	
+}CheckMsgInfo;
+*/
 #pragma pack()
 
 

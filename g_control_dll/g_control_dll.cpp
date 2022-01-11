@@ -29,12 +29,15 @@ typedef int (*IMSICHECKCALLBACKFUN)(ImsiCheckInfo* p_imsiCheckInfo);
 typedef int (*IMSIREPORTCALLBACKFUN)(ImsiReportInfo* p_imsiReportInfo);
 //typedef int (*CARRFREPOINTCHECKFUN)(CarrFrePointCheckInfo* p_carrCheckInfo);
 typedef int (*CARRFREPOINTCHECKFUN)(int ipIndex, char carrIndex,int carr);
+typedef int (*CHECKMSGFUN)(CheckMsgInfo* msgInfo);
+
 
 HEARTBEATCALLBACKFUN pHeartBeatFun=0;
 MSGREPORTCALLBACKFUN pMsgReportFun=0;
 IMSICHECKCALLBACKFUN pImsiCheckFun=0;
 IMSIREPORTCALLBACKFUN pImsiReportFun=0;
 CARRFREPOINTCHECKFUN pCarrCheckInfo=0;
+CHECKMSGFUN pCheckMsg=0;
 
 //
 //	Note!
@@ -195,13 +198,17 @@ UINT heartBeatTheard(LPVOID pr){
 			heartBeat.msgCarrier=0;	
 			memset(buff,0,sizeof(buff));
 			memcpy(buff,&heartBeat,sizeof(MsgHeader));	
-			sendMsg(i+1,buff,sizeof(MsgHeader));
+			if(sendMsg(i+1,buff,sizeof(MsgHeader))<=0){
+				Log("2g heartBeat carrNum0 send error!");
+			}
 			
 			Sleep(5);
 			heartBeat.msgCarrier=1;
 			memset(buff,0,sizeof(buff));
 			memcpy(buff,&heartBeat,sizeof(MsgHeader));	
-			sendMsg(i+1,buff,sizeof(MsgHeader));
+			if(sendMsg(i+1,buff,sizeof(MsgHeader))<=0){
+				Log("2g heartBeat carrNum1 send error");
+			}
 			Sleep(5);
 		}
 		Sleep(heart_sleep_time);		
@@ -219,7 +226,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 	if(pMsgHeader->msgCodeNum==0x11){
 		if(pMsgHeader->msgSerialNum==HEARTBEAT){	//心跳
 			
-			Log("g_heatBeat & ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);		
+			Log("2g_heartBeat ok @@ ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);		
 			(*pHeartBeatFun)(ipIndex,pMsgHeader->msgCarrier,1);			
 		}
 		else if(pMsgHeader->msgSerialNum==CARRFREPOINTCHECK){
@@ -229,9 +236,110 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			reportInfo.ipIndex=ipIndex;	
 			reportInfo.carrierIndex=carrInfo->header.msgCarrier;
 			reportInfo.carrFrePoint=atoi(carrInfo->carr.data);
-
+			
+			Log("2g_carrFrePointCheck ok @@ ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
 			//(*pCarrCheckInfo)(&reportInfo);
 			(*pCarrCheckInfo)(ipIndex,carrInfo->header.msgCarrier,atoi(carrInfo->carr.data));
+		}
+		else if(pMsgHeader->msgSerialNum==CHECKMSG){	//小区查询
+			checkMsgInfo msgInfo;
+			
+			msgInfo.ipIndex=ipIndex; 		
+			msgInfo.carrierIndex=pMsgHeader->msgCarrier;
+			
+			U16 dataType=0;
+			U8 dataSize=0;
+			int num=8;
+			dataSize=p_buff[num];			
+			memcpy(&dataType,p_buff+num+1,2);
+			while(num< len){
+				switch(dataType){
+					case 0x0101:
+						memset(msgInfo.mcc,0,strlen(msgInfo.mcc));
+						memcpy(msgInfo.mcc,p_buff+num+3,dataSize-3);
+						num+=(int)dataSize;
+						dataSize=p_buff[num];
+						dataType=0;
+						memcpy(&dataType,p_buff+num+1,2);
+						break;					
+					case 0x0102:
+						memset(msgInfo.mnc,0,strlen(msgInfo.mnc));
+						memcpy(msgInfo.mnc,p_buff+num+3,dataSize-3);
+						//msgInfo.mnc[strlen(msg->mnc.data)]='\0';
+						num+=(int)dataSize;
+						dataSize=p_buff[num];
+						dataType=0;
+						memcpy(&dataType,p_buff+num+1,2);
+						break;
+					case 0x0103:	
+						memset(msgInfo.lac,0,strlen(msgInfo.lac));
+						memcpy(msgInfo.lac,p_buff+num+3,dataSize-3);
+						//msgInfo.lac[strlen(msg->lac.data)]='\0';
+						num+=(int)dataSize;
+						dataSize=p_buff[num];
+						dataType=0;
+						memcpy(&dataType,p_buff+num+1,2);
+						break;
+					case 0x0104:
+						memset(msgInfo.ci,0,strlen(msgInfo.ci));
+						memcpy(msgInfo.ci,p_buff+num+3,dataSize-3);
+						//msgInfo.ci[strlen(msg->ci.data)]='\0';
+						num+=(int)dataSize;
+						dataSize=p_buff[num];
+						dataType=0;
+						memcpy(&dataType,p_buff+num+1,2);
+						break;
+					case 0x0150:
+						memset(msgInfo.carrierFrePoint,0,strlen(msgInfo.carrierFrePoint));
+						memcpy(msgInfo.carrierFrePoint,p_buff+num+3,dataSize-3);
+						//msgInfo.carrierFrePoint[strlen(msg->carrierFrePoint.data)]='\0';
+						num+=(int)dataSize;
+						dataSize=p_buff[num];
+						dataType=0;
+						memcpy(&dataType,p_buff+num+1,2);
+						break;
+					case 0x0151:
+						memset(msgInfo.downAttenuation,0,strlen(msgInfo.downAttenuation));
+						memcpy(msgInfo.downAttenuation,p_buff+num+3,dataSize-3);
+						//msgInfo.downAttenuation[strlen(msg->downAttenuation.data)]='\0';
+						num+=(int)dataSize;
+						dataSize=p_buff[num];
+						dataType=0;
+						memcpy(&dataType,p_buff+num+1,2);
+						break;
+					case 0x010a:
+						msgInfo.controlMode=p_buff[num+3];
+						num+=(int)dataSize;
+						dataSize=p_buff[num];
+						dataType=0;
+						memcpy(&dataType,p_buff+num+1,2);
+						break;
+					case 0x010b:
+						msgInfo.workMode=p_buff[num+3];
+						num+=(int)dataSize;
+						dataSize=p_buff[num];
+						dataType=0;
+						memcpy(&dataType,p_buff+num+1,2);
+						break;
+					case 0x010c:
+						msgInfo.msgSendMode=p_buff[num+3];
+						num+=(int)dataSize;
+						dataSize=p_buff[num];
+						dataType=0;
+						memcpy(&dataType,p_buff+num+1,2);
+						break;
+					case 0x0002:
+						msgInfo.radioFreq=p_buff[num+3];
+						num+=(int)dataSize;
+						dataSize=p_buff[num];
+						dataType=0;
+						memcpy(&dataType,p_buff+num+1,2);
+						break;				
+				}
+			}	
+			Log("2g_checkMsg ok @@ ipIndex:%d,carNum:%d, mcc:%s, mnc:%s,lac:%s,ci:%s,controlMode:%d, workMode:%d, msgSendMode:%d,radioFreq:%d ",ipIndex,pMsgHeader->msgCarrier, msgInfo.mcc, msgInfo.mnc,msgInfo.lac, msgInfo.ci, msgInfo.controlMode,msgInfo.workMode,msgInfo.msgSendMode,msgInfo.radioFreq);
+			Log("2g_checkMsg ok @@ ipIndex:%d,carNum:%d, carrierFrePoint:%s, downAttenuation:%s",ipIndex,pMsgHeader->msgCarrier, msgInfo.carrierFrePoint, msgInfo.downAttenuation);
+			(*pCheckMsg)(&msgInfo);	
 		}
 	}
 	else if(pMsgHeader->msgCodeNum==0x12){
@@ -240,15 +348,16 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			info.ipIndex=ipIndex;
 			info.carrierIndex=pMsgHeader->msgCarrier;
 			info.msgType=CELLCONFIG;
-			Log("g_setCellConfig Ok & ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
+			
+			Log("2g_setCellConfig ok @@ ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
 			(*pMsgReportFun)(&info);			
 		}else if(pMsgHeader->msgSerialNum==RUNNINGMODE){//运行模式设置
 			MsgInfo info;
 			info.ipIndex=ipIndex;
 			info.carrierIndex=pMsgHeader->msgCarrier;
 			info.msgType=RUNNINGMODE;
-			Log("g_setRunningMode Ok & ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
-
+		
+			Log("2g_setRunningMode ok @@ ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
 			(*pMsgReportFun)(&info);			
 		}
 	}
@@ -257,8 +366,8 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 		info.ipIndex=ipIndex;
 		info.carrierIndex=pMsgHeader->msgCarrier;
 		info.msgType=TURNONRF;
-		Log("g_turnOnRF Ok & ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
-
+		
+		Log("2g_turnOnRF ok @@ ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
 		(*pMsgReportFun)(&info);
 	}
 	else if(pMsgHeader->msgCodeNum==0x16){//关闭射频
@@ -266,8 +375,8 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 		info.ipIndex=ipIndex;
 		info.carrierIndex=pMsgHeader->msgCarrier;
 		info.msgType=TURNOFFRF;
-		Log("g_turnOffRF Ok & ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
-
+		
+		Log("2g_turnOffRF ok @@ ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
 		(*pMsgReportFun)(&info);
 	}
 	else if(pMsgHeader->msgCodeNum==0x17){//重启系统
@@ -275,7 +384,8 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 		info.ipIndex=ipIndex;
 		info.carrierIndex=pMsgHeader->msgCarrier;
 		info.msgType=RESTARTSYSTEM;
-		Log("g_restartSystem Ok & ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
+		
+		Log("2g_restartSystem ok @@ ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
 		(*pMsgReportFun)(&info);
 	}
 	else if(pMsgHeader->msgCodeNum==0x19){//重启板卡
@@ -283,7 +393,8 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 		info.ipIndex=ipIndex;
 		info.carrierIndex=pMsgHeader->msgCarrier;
 		info.msgType=RESTARTCARD;
-		Log("g_restartCard Ok & ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
+		
+		Log("2g_restartCard ok @@ ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
 		(*pMsgReportFun)(&info);
 	}
 	else  if(pMsgHeader->msgCodeNum==0x1b){//黑白名单查询配置
@@ -293,8 +404,8 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			info.ipIndex=ipIndex;
 			info.carrierIndex=addImsiInfo->header.msgCarrier;
 			info.msgType=ADDBLACKIMSI;
-			Log("g_addBlackImsi Ok & ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
-
+			
+			Log("2g_addBlackImsi ok @@ ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
 			(*pMsgReportFun)(&info);
 		}else if(pMsgHeader->msgSerialNum==ADDWHITEIMSI){//addWhiteImsi
 			DataInfo_35* addImsiInfo=(DataInfo_35*) p_buff;	
@@ -302,7 +413,8 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			info.ipIndex=ipIndex;
 			info.carrierIndex=addImsiInfo->header.msgCarrier;
 			info.msgType=ADDWHITEIMSI;
-			Log("g_addWhiteImsi Ok & ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
+			
+			Log("2g_addWhiteImsi ok @@ ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
 			(*pMsgReportFun)(&info);	
 		}
 		else if(pMsgHeader->msgSerialNum==CHECKBLACKIMSI){//checkBlack
@@ -314,7 +426,8 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			memset(imsiInfo.imsi,0,15);
 			memcpy(imsiInfo.imsi,checkImsiInfo->msgInfo.data,15);
 			imsiInfo.imsi[15]='\0';
-			Log("g_checkBlackImsi Ok & ipIndex:%d,carNum:%d,imsi:%s",imsiInfo.ipIndex,imsiInfo.carrierIndex,imsiInfo.imsi);
+			
+			Log("2g_checkBlackImsi ok @@ ipIndex:%d,carNum:%d,imsi:%s",imsiInfo.ipIndex,imsiInfo.carrierIndex,imsiInfo.imsi);
 			(*pImsiCheckFun)(&imsiInfo);
 		}else if(pMsgHeader->msgSerialNum==CHECKWHITEIMSI){	//checkWhite
 			DataInfo_35* checkImsiInfo=(DataInfo_35*) p_buff;
@@ -325,8 +438,8 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			memset(imsiInfo.imsi,0,15);
 			memcpy(imsiInfo.imsi,checkImsiInfo->msgInfo.data,15);
 			imsiInfo.imsi[15]='\0';
-			Log("g_checkWhiteImsi Ok & ipIndex:%d,carNum:%d,imsi:%s",imsiInfo.ipIndex,imsiInfo.carrierIndex,imsiInfo.imsi);
-
+			
+			Log("2g_checkWhiteImsi ok @@ ipIndex:%d,carNum:%d,imsi:%s",imsiInfo.ipIndex,imsiInfo.carrierIndex,imsiInfo.imsi);
 			(*pImsiCheckFun)(&imsiInfo);				
 		}
 		else if(pMsgHeader->msgSerialNum==DELETEBLACKIMSI){
@@ -335,8 +448,8 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			info.ipIndex=ipIndex;
 			info.carrierIndex=deleteImsiInfo->header.msgCarrier;
 			info.msgType=DELETEBLACKIMSI;
-			Log("g_deleteBlackImsi Ok & ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
-
+			
+			Log("2g_deleteBlackImsi ok @@ ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
 			(*pMsgReportFun)(&info);
 		}
 		else if(pMsgHeader->msgSerialNum==DELETEWHITEIMSI){//deleteWhiteImsi
@@ -345,7 +458,8 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			info.ipIndex=ipIndex;
 			info.carrierIndex=deleteImsiInfo->header.msgCarrier;
 			info.msgType=DELETEWHITEIMSI;
-			Log("g_deleteWhiteImsi Ok & ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
+			
+			Log("2g_deleteWhiteImsi ok @@ ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
 			(*pMsgReportFun)(&info);	
 		}
 		else if(pMsgHeader->msgSerialNum==CLEARBLACKIMSI){
@@ -354,7 +468,8 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			info.ipIndex=ipIndex;
 			info.carrierIndex=clearImsiInfo->header.msgCarrier;
 			info.msgType=CLEARBLACKIMSI;
-			Log("g_clearBlackImsi Ok & ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
+			
+			Log("2g_clearBlackImsi ok @@ ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
 			(*pMsgReportFun)(&info);
 		}
 		else if(pMsgHeader->msgSerialNum==CLEARWHITEIMSI){//clearWhiteImsi
@@ -363,7 +478,8 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			info.ipIndex=ipIndex;
 			info.carrierIndex=clearImsiInfo->header.msgCarrier;
 			info.msgType=CLEARWHITEIMSI;
-			Log("g_clearWhiteImsi Ok & ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
+			
+			Log("2g_clearWhiteImsi ok @@ ipIndex:%d,carNum:%d",ipIndex,pMsgHeader->msgCarrier);
 			(*pMsgReportFun)(&info);		
 		}
 	}
@@ -382,7 +498,8 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 		memset(reportInfo.imei,0, 15 );
 		memcpy(reportInfo.imei, imsiInfo->data3.data,15);
 		//reportInfo.imei[15]='\0';
-		Log("g_getImsiReport & ipIndex:%d,carNum:%d,imsi:%s,imei:%s",ipIndex,reportInfo.carrierIndex,reportInfo.imsi,reportInfo.imei);
+		
+		Log("2g_getImsiReport ok @@ ipIndex:%d,carNum:%d,imsi:%s,imei:%s",ipIndex,reportInfo.carrierIndex,reportInfo.imsi,reportInfo.imei);
 		(*pImsiReportFun)(&reportInfo);
 	}
 }
@@ -390,7 +507,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 UINT Main_Socket_Thread(LPVOID pr){	
 	InitLog();
 	udpSocketInit();
-	Log("g_init dll");
+	Log("2g_init dll");
 	//AfxBeginThread( heartBeatTheard, NULL );//心跳
 	
 	struct sockaddr_in from;
@@ -426,6 +543,109 @@ DllExport void g_initRun(){
 	AfxBeginThread( Main_Socket_Thread, NULL );
 }
 
+DllExport void g_checkMsg(int ipIndex,U8 carrierIndicat){
+	CheckMsg msg;
+	msg.header.msgLenth=sizeof(CheckMsg);
+	msg.header.msgSerialNum=CHECKMSG;
+	msg.header.msgCodeNum=0x01;
+	msg.header.msgCarrier=carrierIndicat;
+	msg.header.msgParam=0;
+//	
+	msg.mcc.lenth=0x0b;
+	msg.mcc.serialNum=0x0101;
+	memset(msg.mcc.data,0,8);
+	// for(int i=0;i<8;++i){
+		// msg.mcc.data[i]=0x00;
+	// }
+	//memcpy(msg.mcc.data,mcc,strlen(mcc));
+	
+	msg.mnc.lenth=0x0b;
+	msg.mnc.serialNum=0x0102;
+	memset(msg.mnc.data,0,8);
+	// for(int i=0;i<8;++i){
+		// msg.mnc.data[i]=0x00;
+	// }
+	//memcpy(msg.mnc.data,mnc,strlen(mnc));
+	
+	msg.lac.lenth=0x0b;
+	msg.lac.serialNum=0x0103;
+	memset(msg.lac.data,0,8);
+	// for(int i=0;i<8;++i){
+		// msg.lac.data[i]=0x00;
+	// }
+	//memcpy(msg.lac.data,lac,strlen(lac));
+
+
+	msg.ci.lenth=0x0b;
+	msg.ci.serialNum=0x0104;
+	memset(msg.ci.data,0,8);
+	// for(int i=0;i<8;++i){
+		// msg.ci.data[i]=0x00;
+	// }
+	//memcpy(msg.ci.data,ci,strlen(ci));
+
+	/*
+	msg.tac.lenth=0x07;
+	msg.tac.serialNum=0x011b;
+	memset(msg.tac.data,0,4);
+	*/
+	// for(int i=0;i<4;++i){
+		// msg.tac.data[i]=0x00;
+	// }
+	//memcpy(msg.tac.data,tac,strlen(tac));
+	
+	
+	msg.carrierFrePoint.lenth=0x0b;
+	msg.carrierFrePoint.serialNum=0x0150;
+	memset(msg.carrierFrePoint.data,0,8);
+	// for(int i=0;i<8;++i){
+		// msg.carrierFrePoint.data[i]=0x00;
+	// }
+	//memcpy(msg.carrierFrePoint.data,carrierFrePoint,strlen(carrierFrePoint));
+
+	
+	msg.downAttenuation.lenth=0x0b;
+	msg.downAttenuation.serialNum=0x0151;
+	memset(msg.downAttenuation.data,0,8);
+	// for(int i=0;i<8;++i){
+		// msg.downAttenuation.data[i]=0x00;
+	// }
+	//memcpy(msg.downAttenuation.data,downAttenuation,strlen(downAttenuation));
+	
+//	
+	msg.controlMode.lenth=0x04;
+	msg.controlMode.serialNum=0x010a;
+	msg.controlMode.data=0;
+	
+	msg.workMode.lenth=0x04;
+	msg.workMode.serialNum=0x010b;
+	msg.workMode.data=0;
+	
+	msg.msgSendMode.lenth=0x04;
+	msg.msgSendMode.serialNum=0x010c;
+	msg.msgSendMode.data=0;
+
+//
+	msg.radioFreq.lenth=0x07;
+	msg.radioFreq.serialNum=0x0002;
+	memset(msg.radioFreq.data,0,4);
+	// for(int i=0;i<4;++i){
+		// msg.radioFreq.data[i]=0x00;
+	// }
+	
+	
+	char buff[sizeof(CheckMsg)+1];
+	memset(buff,0,sizeof(buff));
+	memcpy(buff,&msg,sizeof(CheckMsg));
+	buff[sizeof(CheckMsg)]='\0';
+	Log("g_checkMsg begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	if(sendMsg(ipIndex, buff, sizeof(CheckMsg))<=0){
+		Log("g_checkMsg error &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}else{
+		Log("g_checkMsg end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}
+}
+
 DllExport void g_carrFrePointCheck(int ipIndex,U8 carrierIndicat){
 	CarrFrePointCheck carrCheckInfo;
 	
@@ -447,10 +667,14 @@ DllExport void g_carrFrePointCheck(int ipIndex,U8 carrierIndicat){
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&carrCheckInfo,sizeof(CarrFrePointCheck));
 	buff[sizeof(CarrFrePointCheck)]='\0';
-	Log("g_carrFrePointCheck begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	Log("2g_carrFrePointCheck begin && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
-	sendMsg(ipIndex, buff, sizeof(CarrFrePointCheck));
-	Log("g_carrFrePointCheck end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	if(sendMsg(ipIndex, buff, sizeof(CarrFrePointCheck))<=0){
+		Log("2g_carrFrePointCheck error && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}else{
+		Log("2g_carrFrePointCheck end && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}
+	
 }
 
 DllExport void g_setCellConfig(int ipIndex,U8 carrierIndicat, U8* mcc,U8* mnc, U8* lac,U8* ci, U8* tac,U8* carrierFrePoint, U8* downAttenuation){
@@ -516,10 +740,13 @@ DllExport void g_setCellConfig(int ipIndex,U8 carrierIndicat, U8* mcc,U8* mnc, U
 	char buff[sizeof(CellConfig)+1];
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&cellInfo,sizeof(CellConfig));
-	Log("g_setCellConfig begin&&ipIndex:%d,carNum:%d,mcc:%s,mnc:%s,lac:%s,ci:%s,tac:%s,carrier:%s,downAtten:%s",ipIndex,carrierIndicat,mcc,mnc,lac,ci,tac,carrierFrePoint,downAttenuation);
+	Log("2g_setCellConfig begin && ipIndex:%d,carNum:%d,mcc:%s,mnc:%s,lac:%s,ci:%s,tac:%s,carrier:%s,downAtten:%s",ipIndex,carrierIndicat,mcc,mnc,lac,ci,tac,carrierFrePoint,downAttenuation);
 	//Log("setCellConfig:%s",buff);
-	sendMsg(ipIndex, buff, sizeof(CellConfig));
-	Log("g_setCellConfig end&&ipIndex:%d,carNum:%d,mcc:%s,mnc:%s,lac:%s,ci:%s,tac:%s,carrier:%s,downAtten:%s",ipIndex,carrierIndicat,mcc,mnc,lac,ci,tac,carrierFrePoint,downAttenuation);
+	if(sendMsg(ipIndex, buff, sizeof(CellConfig))<=0){
+		Log("2g_setCellConfig error && ipIndex:%d,carNum:%d,mcc:%s,mnc:%s,lac:%s,ci:%s,tac:%s,carrier:%s,downAtten:%s",ipIndex,carrierIndicat,mcc,mnc,lac,ci,tac,carrierFrePoint,downAttenuation);
+	}else{
+		Log("2g_setCellConfig end && ipIndex:%d,carNum:%d,mcc:%s,mnc:%s,lac:%s,ci:%s,tac:%s,carrier:%s,downAtten:%s",ipIndex,carrierIndicat,mcc,mnc,lac,ci,tac,carrierFrePoint,downAttenuation);
+	}
 
 }
 
@@ -547,10 +774,13 @@ DllExport void g_setRunningMode(int ipIndex,U8 carrierIndicat, U8 controlMode, U
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&runningModeInfo,sizeof(RunningMode));
 	
-	Log("g_setRunningMode begin &&ipIndex:%d,carNum:%d,controlMode:%d,workMode:%d,msgSendMode:%d",ipIndex,carrierIndicat,controlMode,workMode,msgSendMode);
+	Log("2g_setRunningMode begin && ipIndex:%d,carNum:%d,controlMode:%d,workMode:%d,msgSendMode:%d",ipIndex,carrierIndicat,controlMode,workMode,msgSendMode);
 
-	sendMsg(ipIndex, buff, sizeof(RunningMode));
-	Log("g_setRunningMode end &&ipIndex:%d,carNum:%d,controlMode:%d,workMode:%d,msgSendMode:%d",ipIndex,carrierIndicat,controlMode,workMode,msgSendMode);
+	if(sendMsg(ipIndex, buff, sizeof(RunningMode))<=0){
+		Log("2g_setRunningMode error && ipIndex:%d,carNum:%d,controlMode:%d,workMode:%d,msgSendMode:%d",ipIndex,carrierIndicat,controlMode,workMode,msgSendMode);
+	}else{
+		Log("2g_setRunningMode end && ipIndex:%d,carNum:%d,controlMode:%d,workMode:%d,msgSendMode:%d",ipIndex,carrierIndicat,controlMode,workMode,msgSendMode);
+	}
 
 }
 
@@ -565,10 +795,12 @@ DllExport void g_turnOnRF(int ipIndex,U8 carrierIndicat){
 	char buff[sizeof(MsgHeader)+1];
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&headerInfo,sizeof(MsgHeader));
-	Log("g_turnOnRF begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	Log("2g_turnOnRF begin && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
-	sendMsg(ipIndex, buff, sizeof(MsgHeader));
-	Log("g_turnOnRF end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	if(sendMsg(ipIndex, buff, sizeof(MsgHeader))<=0){
+		Log("2g_turnOnRF error && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}
+	Log("2g_turnOnRF end && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
 }
 
@@ -583,10 +815,12 @@ DllExport void g_turnOffRF(int ipIndex,U8 carrierIndicat){
 	char buff[sizeof(MsgHeader)+1];
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&headerInfo,sizeof(MsgHeader));
-	Log("g_turnOffRF begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
-	sendMsg(ipIndex, buff, sizeof(MsgHeader));
-	Log("g_turnOffRF end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
-
+	Log("2g_turnOffRF begin && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	if(sendMsg(ipIndex, buff, sizeof(MsgHeader))<=0){
+		Log("2g_turnOffRF error && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}else{
+		Log("2g_turnOffRF end && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}
 }
 
 DllExport void g_restartSystem(int ipIndex,U8 carrierIndicat){
@@ -600,9 +834,12 @@ DllExport void g_restartSystem(int ipIndex,U8 carrierIndicat){
 	char buff[sizeof(MsgHeader)+1];
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&headerInfo,sizeof(MsgHeader));
-	Log("g_restartSystem begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
-	sendMsg(ipIndex, buff, sizeof(MsgHeader));
-	Log("g_restartSystem end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	Log("2g_restartSystem begin && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	if(sendMsg(ipIndex, buff, sizeof(MsgHeader))<=0){
+		Log("2g_restartSystem error && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}else{
+		Log("2g_restartSystem end && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}
 
 }
 
@@ -618,10 +855,12 @@ DllExport void g_restartCard(int ipIndex,U8 carrierIndicat){
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&headerInfo,sizeof(MsgHeader));
 	buff[sizeof(MsgHeader)]='\0';	
-	Log("g_restartCard begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
-	sendMsg(ipIndex, buff, sizeof(MsgHeader));
-	Log("g_restartCard end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
-
+	Log("2g_restartCard begin && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	if(sendMsg(ipIndex, buff, sizeof(MsgHeader))<=0){
+		Log("2g_restartCard error && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}else{
+		Log("2g_restartCard end && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}
 }
 
 DllExport void g_addBlackImsi(int ipIndex,U8 carrierIndicat,char* imsi){
@@ -646,9 +885,12 @@ DllExport void g_addBlackImsi(int ipIndex,U8 carrierIndicat,char* imsi){
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&addImsiInfo,sizeof(DataInfo_35));
 	buff[sizeof(DataInfo_35)]='\0';	
-	Log("g_addBlackImsi begin &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
-	sendMsg(ipIndex, buff, sizeof(DataInfo_35));
-	Log("g_addBlackImsi end &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
+	Log("2g_addBlackImsi begin && ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
+	if(sendMsg(ipIndex, buff, sizeof(DataInfo_35))<=0){
+		Log("2g_addBlackImsi error && ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
+	}else{
+		Log("2g_addBlackImsi end && ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
+	}
 
 }
 
@@ -674,9 +916,12 @@ DllExport void g_addWhiteImsi(int ipIndex,U8 carrierIndicat,char* imsi){
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&addImsiInfo,sizeof(DataInfo_35));
 	buff[sizeof(DataInfo_35)]='\0';	
-	Log("g_addWhiteImsi begin &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
-	sendMsg(ipIndex, buff, sizeof(DataInfo_35));
-	Log("g_addWhiteImsi end &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
+	Log("2g_addWhiteImsi begin && ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
+	if(sendMsg(ipIndex, buff, sizeof(DataInfo_35))<=0){
+		Log("2g_addWhiteImsi error && ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
+	}else{
+		Log("2g_addWhiteImsi end && ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
+	}
 
 }
 
@@ -695,11 +940,13 @@ DllExport void g_checkBlackImsi(int ipIndex,U8 carrierIndicat){
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&checkImsiInfo,sizeof(DataInfo_0));	
 	buff[sizeof(DataInfo_0)]='\0';	
-	Log("g_checkBlackImsi begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	Log("2g_checkBlackImsi begin && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
-	sendMsg(ipIndex, buff, sizeof(DataInfo_0));
-	Log("g_checkBlackImsi end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
-
+	if(sendMsg(ipIndex, buff, sizeof(DataInfo_0))<=0){
+		Log("2g_checkBlackImsi error && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}else{
+		Log("2g_checkBlackImsi end && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}
 }
 
 DllExport void g_checkWhiteImsi(int ipIndex,U8 carrierIndicat){
@@ -717,11 +964,13 @@ DllExport void g_checkWhiteImsi(int ipIndex,U8 carrierIndicat){
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&checkImsiInfo,sizeof(DataInfo_0));
 	buff[sizeof(DataInfo_0)]='\0';		
-	Log("g_checkWhiteImsi begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	Log("2g_checkWhiteImsi begin && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
-	sendMsg(ipIndex, buff, sizeof(DataInfo_0));
-	Log("g_checkWhiteImsi end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
-
+	if(sendMsg(ipIndex, buff, sizeof(DataInfo_0))<=0){
+		Log("2g_checkWhiteImsi error && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}else{
+		Log("2g_checkWhiteImsi end && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}
 }
 
 DllExport void g_deleteBlackImsi(int ipIndex,U8 carrierIndicat,char* imsi){
@@ -746,11 +995,13 @@ DllExport void g_deleteBlackImsi(int ipIndex,U8 carrierIndicat,char* imsi){
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&deleteImsiInfo,sizeof(DataInfo_35));
 	buff[sizeof(DataInfo_35)]='\0';	
-	Log("g_deleteBlackImsi begin &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
+	Log("2g_deleteBlackImsi begin && ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
 
-	sendMsg(ipIndex, buff, sizeof(DataInfo_35));
-	Log("g_deleteBlackImsi end &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
-
+	if(sendMsg(ipIndex, buff, sizeof(DataInfo_35))<=0){
+		Log("2g_deleteBlackImsi error && ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
+	}else{
+		Log("2g_deleteBlackImsi end && ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
+	}
 }
 
 DllExport void g_deleteWhiteImsi(int ipIndex,U8 carrierIndicat,char* imsi){
@@ -775,10 +1026,13 @@ DllExport void g_deleteWhiteImsi(int ipIndex,U8 carrierIndicat,char* imsi){
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&deleteImsiInfo,sizeof(DataInfo_35));
 	buff[sizeof(DataInfo_35)]='\0';	
-	Log("g_deleteWhiteImsi begin &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
+	Log("2g_deleteWhiteImsi begin && ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
 
-	sendMsg(ipIndex, buff, sizeof(DataInfo_35));
-	Log("g_deleteWhiteImsi end &&ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
+	if(sendMsg(ipIndex, buff, sizeof(DataInfo_35))<=0){
+		Log("2g_deleteWhiteImsi error && ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
+	}else{
+		Log("2g_deleteWhiteImsi end && ipIndex:%d,carNum:%d,imsi:%s",ipIndex,carrierIndicat,imsi);
+	}
 
 }
 
@@ -797,11 +1051,13 @@ DllExport void g_clearBlackImsiList(int ipIndex,U8 carrierIndicat){
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&clearImsiInfo,sizeof(DataInfo_0));
 	buff[sizeof(DataInfo_0)]='\0';	
-	Log("g_clearBlackImsiList begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	Log("2g_clearBlackImsiList begin && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
-	sendMsg(ipIndex, buff, sizeof(DataInfo_0));
-	Log("g_clearBlackImsiList end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
-
+	if(sendMsg(ipIndex, buff, sizeof(DataInfo_0))<=0){
+		Log("2g_clearBlackImsiList error && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}else{
+		Log("2g_clearBlackImsiList end && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}
 }
 
 DllExport void g_clearWhiteImsiList(int ipIndex,U8 carrierIndicat){
@@ -819,10 +1075,13 @@ DllExport void g_clearWhiteImsiList(int ipIndex,U8 carrierIndicat){
 	memset(buff,0,sizeof(buff));
 	memcpy(buff,&clearImsiInfo,sizeof(DataInfo_0));
 	buff[sizeof(DataInfo_0)]='\0';
-	Log("g_clearWhiteImsiList begin &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	Log("2g_clearWhiteImsiList begin && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
 
-	sendMsg(ipIndex, buff, sizeof(DataInfo_0));
-	Log("g_clearWhiteImsiList end &&ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	if(sendMsg(ipIndex, buff, sizeof(DataInfo_0))<=0){
+		Log("2g_clearWhiteImsiList error && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);
+	}else{
+		Log("2g_clearWhiteImsiList end && ipIndex:%d,carNum:%d",ipIndex,carrierIndicat);	
+	}
 
 }
 
@@ -850,5 +1109,10 @@ DllExport int g_getImsiReportCallBack(int (*pFun)(ImsiReportInfo* p_imsiReportIn
 //DllExport int  g_carrFrePointCheckCallBack(int (*pFun)(CarrFrePointCheckInfo* p_carrCheckInfo)){
 DllExport int  g_carrFrePointCheckCallBack(int (*pFun)(int ipIndex, char carrIndex,int carr)){
 	pCarrCheckInfo=pFun;
+	return 1;
+}
+
+DllExport int  g_checkMsgInfoCallBack(int (*pFun)(CheckMsgInfo* msgInfo)){
+	pCheckMsg=pFun;
 	return 1;
 }

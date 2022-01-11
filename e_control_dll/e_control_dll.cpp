@@ -44,8 +44,6 @@ int udpConnectFlag=1;
 int m_send_Port=51888;
 int heart_sleep_time=0;
 
-pthread_mutex_t send_mutex;
-
 vector<string>m_recvIpVec;
 vector<int> m_recvIpPortVec;
 vector<int>m_stopIpVec;
@@ -127,7 +125,6 @@ inline int sendMsg(int ipIndex, char* buff, int buffLenth){
 	m_atrget_addr.sin_family = AF_INET;
 	m_atrget_addr.sin_port = htons(m_recvIpPortVec[ipIndex-1]);  //端口
 	m_atrget_addr.sin_addr.s_addr = inet_addr(m_recvIpVec[ipIndex-1].c_str());
-	
 	
 	int ret = sendto(mserver, (char*)buff, buffLenth, 0, 
         (SOCKADDR *)&(m_atrget_addr), sizeof(SOCKADDR));
@@ -322,7 +319,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
     if (pRootElement){
 		TiXmlElement* p_secLeaf = pRootElement->FirstChildElement();
         string secLeaf_str=p_secLeaf->Value();
-		Log("4g_msg_recv@@ipIndex:%d, msg:%s",ipIndex,secLeaf_str.c_str());
+		Log("4g_msg_recv ok @@ ipIndex:%d, msg:%s",ipIndex,secLeaf_str.c_str());
 		if(secLeaf_str=="status_response"){			//%%心跳 
 		    TiXmlElement* p_status = p_secLeaf->FirstChildElement("status");
 			const char *status_char = p_status->GetText();  //判断是否为空:if(status)						
@@ -331,7 +328,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 				
 				//printf("heartbeat status:%d\n",m_status);
 				//AfxMessageBox("0");
-				Log("4g_status_response@@ipIndex:%d, m_status:%d",ipIndex,m_status);
+				Log("4g_status_response ok @@ ipIndex:%d, m_status:%d",ipIndex,m_status);
 				(*pStatusFun)(ipIndex,0,m_status);	
 			}
 		}
@@ -382,7 +379,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			const char *maxTxPower_char = p_maxTxPower->GetText();
 			int m_maxTxPower=atoi(maxTxPower_char);	
 	
-			Log("4g_femto_status@@ipIndex:%d,status:%d,euarfcn:%d,mcc:%d,mnc:%s,pci:%d,periodTac:%d,txpower:%d,maxTxPower:%d,tac:%d",ipIndex,m_status, m_euarfcn,m_mcc,m_mnc_char,m_pci,m_periodTac,m_txpower,m_maxTxPower,m_tac);
+			Log("4g_femto_status ok @@ ipIndex:%d,status:%d,euarfcn:%d,mcc:%d,mnc:%s,pci:%d,periodTac:%d,txpower:%d,maxTxPower:%d,tac:%d",ipIndex,m_status, m_euarfcn,m_mcc,m_mnc_char,m_pci,m_periodTac,m_txpower,m_maxTxPower,m_tac);
 			//(*pCellStatusResponseFun)(ipIndex, m_status, &cellInfo);
 			(*pCellStatusResponseFun)(ipIndex, m_status, m_euarfcn,m_mcc, m_mnc_char, m_pci,m_periodTac,m_txpower);
 			free(m_mnc_char);
@@ -401,7 +398,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 				//CString str;
 				//str.Format("config status:%d",m_status);
 				//AfxMessageBox(str);
-				Log("4g_set_configuration_result@@ipIndex:%d,m_result:%d,m_rebootflag:%d",ipIndex, m_result,m_rebootflag);
+				Log("4g_set_configuration_result ok @@ ipIndex:%d,m_result:%d,m_rebootflag:%d",ipIndex, m_result,m_rebootflag);
 				(*pStatusFun)(ipIndex, 1,m_result); 				
 			}
 		}
@@ -415,7 +412,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			int m_result=atoi(result_char);
 			int m_rebootflag=atoi(rebootflag_char);
 			//printf("set_redirection_rsp result:%d\n",m_result);
-			Log("4g_set_redirection_rsp@@ipIndex:%d,m_result:%d,m_rebootflag:%d",ipIndex,m_result,m_rebootflag);
+			Log("4g_set_redirection_rsp ok @@ ipIndex:%d,m_result:%d,m_rebootflag:%d",ipIndex,m_result,m_rebootflag);
 			(*pStatusFun)(ipIndex, 2,m_result); 
 		}
 		else if(secLeaf_str=="activate_nodeb_result"){		//%%激活小区
@@ -427,7 +424,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			int m_result=atoi(result_char);
 			int m_rebootflag=atoi(rebootflag_char);
 			//printf("activate_nodeb_result result:%d\n",m_result);
-			Log("4g_activate_nodeb_result@@ipIndex:%d, m_result:%d,m_rebootflag:%d",ipIndex, m_result,m_rebootflag);
+			Log("4g_activate_nodeb_result ok @@ ipIndex:%d, m_result:%d,m_rebootflag:%d",ipIndex, m_result,m_rebootflag);
 			(*pStatusFun)(ipIndex, 3,m_result); 
 		}
 		else if(secLeaf_str=="imsi_list_config_result"){	//%%黑白名单添加
@@ -435,7 +432,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			const char *result_char = p_result->GetText();
 			int m_result=atoi(result_char);
 			//printf("imsi_list_config_result result:%d\n",m_result);
-			Log("4g_imsi_list_config_result@@ipIndex:%d,m_result:%d",ipIndex, m_result);
+			Log("4g_imsi_list_config_result ok @@ ipIndex:%d,m_result:%d",ipIndex, m_result);
 			(*pStatusFun)(ipIndex, 4,m_result); 
 		}
 		else if(secLeaf_str=="imsi_list_check_result"){		//%%黑白名单查询
@@ -446,7 +443,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 				if(p_w_imsi){
 					while(p_w_imsi){
 						string imsi = p_w_imsi->GetText();
-						Log("4g_imsi_list_check_result@@ipIndex:%d, whiteimsi:%s",ipIndex, imsi.c_str());
+						Log("4g_white_imsi_list_check_result @@ ipIndex:%d, whiteimsi:%s",ipIndex, imsi.c_str());
 						whiteVec.push_back(imsi);
 						p_w_imsi=p_w_imsi->NextSiblingElement();
 					}
@@ -459,12 +456,12 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 							//whiteImsiList[i][15]='\0';
 						}
 						whiteImsiList[imsiNum*15*sizeof(char)]='\0';
-						Log("4g_imsi_list_check_result@@ipIndex:%d, white imsi Num:%d",ipIndex, imsiNum);
+						Log("4g_white_imsi_list_check_result ok @@ ipIndex:%d, white imsi Num:%d",ipIndex, imsiNum);
 						(*pWhiteImsiCheckFun)(ipIndex, whiteImsiList,imsiNum );
 						free(whiteImsiList);
 					}					
 				}else{
-					Log("4g_imsi_list_check_result@@ipIndex:%d, white imsiNum:%d",ipIndex, 0);
+					Log("4g_white_imsi_list_check_result ok @@ ipIndex:%d, white imsiNum:%d",ipIndex, 0);
 					(*pWhiteImsiCheckFun)(ipIndex, "NULL",0 );
 				}			
 			}
@@ -474,7 +471,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 				if(p_b_imsi){
 					while(p_b_imsi){
 						string imsi = p_b_imsi->GetText();
-						Log("4g_imsi_list_check_result@@ipIndex:%d, blackimsi:%s",ipIndex, imsi.c_str());
+						Log("4g_black_imsi_list_check_result @@ ipIndex:%d, blackimsi:%s",ipIndex, imsi.c_str());
 						blackVec.push_back(imsi);
 						p_b_imsi=p_b_imsi->NextSiblingElement();
 						p_b_imsi=p_b_imsi->NextSiblingElement();
@@ -487,13 +484,13 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 						for(int i=0;i<imsiNum;++i){
 							memcpy(&blackImsiList[i*15],blackVec[i].c_str(),15);
 						}
-						Log("4g_imsi_list_check_result@@ipIndex:%d, black imsi Num:%d",ipIndex, imsiNum);
+						Log("4g_black_imsi_list_check_result ok @@ ipIndex:%d, black imsi Num:%d",ipIndex, imsiNum);
 						blackImsiList[imsiNum*15*sizeof(char)]='\0';
 						(*pBlackImsiCheckFun)(ipIndex, blackImsiList,imsiNum );						
 						free(blackImsiList);
 					}				
 				}else{
-					Log("4g_imsi_list_check_result@@ipIndex:%d, black imsiNum:%d",ipIndex, 0);
+					Log("4g_black_imsi_list_check_result ok @@ ipIndex:%d, black imsiNum:%d",ipIndex, 0);
 					(*pBlackImsiCheckFun)(ipIndex, "NULL",0 );		
 				}
 				
@@ -505,7 +502,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			const char *result_char = P_result->GetText();
 			int m_result=atoi(result_char);
 			//printf("imsi_list_delconfig_result result:%d\n",m_result);
-			Log("4g_imsi_list_delconfig_result@@ipIndex:%d, m_result:%d",ipIndex, m_result);
+			Log("4g_imsi_list_delconfig_result ok @@ ipIndex:%d, m_result:%d",ipIndex, m_result);
 			(*pStatusFun)(ipIndex, 5,m_result); 			
 		}
 		else if(secLeaf_str=="scanner"){					//%%捕号IMSI上报
@@ -554,7 +551,7 @@ void dispRecvedMsg(int ipIndex, char* p_buff, int len){
 			int m_rsrp=atoi(rsrp_char);
 			imsiInfo.rsrp=m_rsrp;
 
-			Log("4g_scanner@@ipIndex:%d, userType:%d,imsi:%s,imei:%s,rsrp:%d",ipIndex, m_userType,imsiInfo.imsi,imsiInfo.imei,m_rsrp);
+			Log("4g_scanner ok @@ ipIndex:%d, userType:%d,imsi:%s,imei:%s,rsrp:%d",ipIndex, m_userType,imsiInfo.imsi,imsiInfo.imei,m_rsrp);
 			(*pIMSIReportFun)(&imsiInfo);			
 		}
 	}
@@ -630,10 +627,13 @@ DllExport void e_femtoStatusRequest(int ipIndex){
 
 	buff[lenth]='\0';
 	
-	Log("4g_femto_status_request begin@@ipIndex:%d",ipIndex);
+	Log("4g_femto_status_request begin && ipIndex:%d",ipIndex);
 	if (udpConnectFlag){
-		sendMsg(ipIndex,buff,lenth-1);
-		Log("4g_femto_status_request end@@ipIndex:%d",ipIndex);
+		if(sendMsg(ipIndex,buff,lenth-1)<=0){
+			Log("4g_femto_status_request error && ipIndex:%d",ipIndex);
+		}
+		Log("4g_femto_status_request end && ipIndex:%d",ipIndex);
+		
 	}
 	delete docXml;
 	docXml = NULL;
@@ -723,10 +723,11 @@ DllExport void e_setCellConfig(int ipIndex, int euarfcn, int mcc,char* mnc, int 
 #endif
 	
 	if (udpConnectFlag){
-		Log("4g_setCellConfig begin.");
-		if(sendMsg(ipIndex,buff,lenth-1)>0){
-			Log("4g_setCellConfig end@@ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d,tac:%d,periodTac:%d",ipIndex, euarfcn,mcc,mnc,pci,tac,periodTac);
+		Log("4g_setCellConfig begin && ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d,tac:%d,periodTac:%d",ipIndex, euarfcn,mcc,mnc,pci,tac,periodTac);
+		if(sendMsg(ipIndex,buff,lenth-1)<=0){
+			Log("4g_setCellConfig error && ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d,tac:%d,periodTac:%d",ipIndex, euarfcn,mcc,mnc,pci,tac,periodTac);
 		}
+		Log("4g_setCellConfig end && ipIndex:%d, euarfcn:%d,mcc:%d,mnc:%s,pci:%d,tac:%d,periodTac:%d",ipIndex, euarfcn,mcc,mnc,pci,tac,periodTac);
 	}
 	delete docXml;
 	docXml = NULL;
@@ -1105,9 +1106,11 @@ DllExport void  e_setBlackRedirection(int ipIndex, int arfcn){
 	
 	
 	if (udpConnectFlag){
-		Log("4g_setBlackRedirection begin@@ipIndex:%d, arfcn:%d",ipIndex, arfcn);
-		if(sendMsg(ipIndex, buff,lenth-1)>0){
-			Log("4g_setBlackRedirection end@@ipIndex:%d,%s",ipIndex,buff);
+		Log("4g_setBlackRedirection begin && ipIndex:%d, arfcn:%d",ipIndex, arfcn);
+		if(sendMsg(ipIndex, buff,lenth-1)<=0){
+			Log("4g_setBlackRedirection error && ipIndex:%d, arfcn:%d",ipIndex, arfcn);
+		}else{
+			Log("4g_setBlackRedirection end && ipIndex:%d, arfcn:%d",ipIndex, arfcn);
 		}
 	}
 	delete docXml;
@@ -1294,12 +1297,15 @@ DllExport void e_setWhiteRedirection(int ipIndex,int arfcn){
 
 	buff[lenth]='\0';
 #endif
-	Log("4g_setWhiteRedirection begin@@ipIndex:%d,%s",buff);
-	Log("4g_setWhiteRedirection begin@@ipIndex:%d, arfcn:%d",ipIndex, arfcn);
+
+	Log("4g_setWhiteRedirection begin && ipIndex:%d, arfcn:%d",ipIndex, arfcn);
 	
 	if (udpConnectFlag){
-		if(sendMsg(ipIndex, buff,lenth-1)>0){
-			Log("4g_setBlackRedirection end@@ipIndex:%d,%s",ipIndex,buff);
+		if(sendMsg(ipIndex, buff,lenth-1)<=0){
+			Log("4g_setWhiteRedirection error && ipIndex:%d, arfcn:%d",ipIndex, arfcn);
+		}
+		else{
+			Log("4g_setWhiteRedirection end && ipIndex:%d, arfcn:%d",ipIndex, arfcn);
 		}
 	}
 	
@@ -1362,11 +1368,13 @@ DllExport void e_activeCell(int ipIndex,int active_mode, int mode){
 	buff[lenth]='\0';
 #endif
 
-	Log("4g_activeCell begin@@ipIndex:%d, active_mode:%d,mode:%d",ipIndex, active_mode,mode);
+	Log("4g_activeCell begin @@ ipIndex:%d, active_mode:%d,mode:%d",ipIndex, active_mode,mode);
 	if (udpConnectFlag){
-		sendMsg(ipIndex, buff,lenth-1);
-		Log("4g_activeCell end@@ipIndex:%d, active_mode:%d,mode:%d",ipIndex, active_mode,mode);
-
+		if(sendMsg(ipIndex, buff,lenth-1)<=0){
+			Log("4g_activeCell error @@ ipIndex:%d, active_mode:%d,mode:%d",ipIndex, active_mode,mode);
+		}else{
+			Log("4g_activeCell end @@ ipIndex:%d, active_mode:%d,mode:%d",ipIndex, active_mode,mode);
+		}
 	}
 	delete docXml;
 	docXml = NULL;
@@ -1426,11 +1434,13 @@ DllExport void e_addWhiteImsi(int ipIndex, char* whiteImsi){
 	buff[lenth]='\0';
 #endif
 
-	Log("4g_addWhiteImsi begin@@ipIndex:%d, whiteImsi:%s",ipIndex, whiteImsi);
+	Log("4g_addWhiteImsi begin && ipIndex:%d, whiteImsi:%s",ipIndex, whiteImsi);
 	if (udpConnectFlag){
-		sendMsg(ipIndex, buff,lenth-1);
-		Log("4g_addWhiteImsi end@@ipIndex:%d, whiteImsi:%s",ipIndex, whiteImsi);
-
+		if(sendMsg(ipIndex, buff,lenth-1)<=0){
+			Log("4g_addWhiteImsi error && ipIndex:%d, whiteImsi:%s",ipIndex, whiteImsi);
+		}else{
+			Log("4g_addWhiteImsi end && ipIndex:%d, whiteImsi:%s",ipIndex, whiteImsi);
+		}
 	}
 	delete docXml;
 	docXml = NULL;
@@ -1502,10 +1512,14 @@ DllExport void e_addBlackImsi(int ipIndex,char* blackImsi){
 	buff[lenth]='\0';
 #endif
 
-	Log("4g_addBlackImsi begin@@ipIndex:%d, blackImsi:%s",ipIndex, blackImsi);
+	Log("4g_addBlackImsi begin && ipIndex:%d, blackImsi:%s",ipIndex, blackImsi);
 	if (udpConnectFlag){
-		sendMsg(ipIndex, buff,lenth-1);
-		Log("4g_addBlackImsi end@@ipIndex:%d, blackImsi:%s",ipIndex, blackImsi);
+		if(sendMsg(ipIndex, buff,lenth-1)<=0){
+			Log("4g_addBlackImsi error && ipIndex:%d, blackImsi:%s",ipIndex, blackImsi);
+		}esle{
+			Log("4g_addBlackImsi end && ipIndex:%d, blackImsi:%s",ipIndex, blackImsi);
+		}
+		
 
 	}
 	delete docXml;
@@ -1575,10 +1589,14 @@ DllExport void e_deleteWhiteImsi(int ipIndex,char* whiteImsi, int n){
 	buff[lenth]='\0';
 #endif
 
-	Log("4g_deleteWhiteImsi begin@@ipIndex:%d, num:%d,whiteImsi:%s",ipIndex, n,whiteImsi);
+	Log("4g_deleteWhiteImsi begin && ipIndex:%d, num:%d,whiteImsi:%s",ipIndex, n,whiteImsi);
 	if (udpConnectFlag){
-		sendMsg(ipIndex, buff,lenth-1);
-		Log("4g_deleteWhiteImsi end@@ipIndex:%d, num:%d,whiteImsi:%s",ipIndex, n,whiteImsi);
+		if(sendMsg(ipIndex, buff,lenth-1)<=0){
+			Log("4g_deleteWhiteImsi error && ipIndex:%d, num:%d,whiteImsi:%s",ipIndex, n,whiteImsi);
+		}else{
+			Log("4g_deleteWhiteImsi end && ipIndex:%d, num:%d,whiteImsi:%s",ipIndex, n,whiteImsi);
+		}
+		
 
 	}
 	delete docXml;
@@ -1649,11 +1667,13 @@ DllExport void e_deleteBlackImsi(int ipIndex,char* blackImsi,int n){
 	buff[lenth]='\0';
 #endif
 
-	Log("4g_deleteBlackImsi begin@@ipIndex:%d, num:%d,blackImsi:%s",ipIndex, n,blackImsi);
+	Log("4g_deleteBlackImsi begin && ipIndex:%d, num:%d,blackImsi:%s",ipIndex, n,blackImsi);
 	if (udpConnectFlag){
-		sendMsg(ipIndex, buff,lenth-1);
-		Log("4g_deleteBlackImsi end@@ipIndex:%d, num:%d,blackImsi:%s",ipIndex, n,blackImsi);
-
+		if(sendMsg(ipIndex, buff,lenth-1)<=0){
+			Log("4g_deleteBlackImsi error && ipIndex:%d, num:%d,blackImsi:%s",ipIndex, n,blackImsi);
+		}else{
+			Log("4g_deleteBlackImsi end && ipIndex:%d, num:%d,blackImsi:%s",ipIndex, n,blackImsi);
+		}
 	}
 	delete docXml;
 	docXml = NULL;
@@ -1703,10 +1723,14 @@ DllExport void e_imsiListCheck(int ipIndex){
 	buff[lenth]='\0';
 #endif
 	
-	Log("4g_imsiListCheck begin@@ipIndex:%d",ipIndex);
+	Log("4g_imsiListCheck begin && ipIndex:%d",ipIndex);
 	if (udpConnectFlag){
-		sendMsg(ipIndex,buff,lenth-1);
-		Log("4g_imsiListCheck end@@ipIndex:%d",ipIndex);
+		if(sendMsg(ipIndex,buff,lenth-1)<=0){
+			Log("4g_imsiListCheck error && ipIndex:%d",ipIndex);
+		}else{
+			Log("4g_imsiListCheck end && ipIndex:%d",ipIndex);
+		}
+		
 	}
 	delete docXml;
 	docXml = NULL;

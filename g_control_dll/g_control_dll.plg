@@ -6,6 +6,22 @@
 --------------------Configuration: g_control_dll - Win32 Release--------------------
 </h3>
 <h3>Command Lines</h3>
+Creating temporary file "C:\Users\chw\AppData\Local\Temp\RSP277D.tmp" with contents
+[
+/nologo /subsystem:windows /dll /incremental:no /pdb:"Release/g_control_dll.pdb" /machine:I386 /def:".\g_control_dll.def" /out:"Release/g_control_dll.dll" /implib:"Release/g_control_dll.lib" 
+.\Release\g_control_dll.obj
+.\Release\log_out.obj
+.\Release\StdAfx.obj
+.\Release\tinystr.obj
+.\Release\tinyxml.obj
+.\Release\tinyxmlerror.obj
+.\Release\tinyxmlparser.obj
+.\Release\g_control_dll.res
+]
+Creating command line "link.exe @C:\Users\chw\AppData\Local\Temp\RSP277D.tmp"
+<h3>Output Window</h3>
+Linking...
+   Creating library Release/g_control_dll.lib and object Release/g_control_dll.exp
 
 
 
